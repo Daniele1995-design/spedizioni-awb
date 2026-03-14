@@ -202,6 +202,9 @@ function onToken(resp){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo();loadDates();
+    // DEBUG: stampa i file trovati nella cartella
+  listFiles('"'+FOLDER_ID+'" in parents and trashed=false')
+    .then(function(f){ console.log('File nella cartella:', f); });
 }
 
 // ── USER ──────────────────────────────────────
