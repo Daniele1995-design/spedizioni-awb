@@ -154,7 +154,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   </div>
 
   <div class="filters">
-    <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange()"><option>Caricamento...</option></select></div>
+    <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange();loadData()"><option>Caricamento...</option></select></div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
     <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listDestino"></datalist></div>
