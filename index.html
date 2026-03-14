@@ -151,7 +151,8 @@ td.awb-empty{color:var(--border);font-size:18px;text-align:center}
   <div class="filters">
     <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange()"><option>Caricamento...</option></select></div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="updateLoadBtn()"><option value="">— Seleziona —</option></select></div>
-    <div class="fg"><div class="fl">Commessa / Ricerca</div><input id="fCommessa" class="fc" type="text" placeholder="Filtra per commessa, cliente..." style="min-width:200px"></div>
+    <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc"><option value="">— Tutte —</option></select></div>
+    <div class="fg"><div class="fl">Destino</div><select id="fDestino" class="fc"><option value="">— Tutti —</option></select></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <div class="filter-info" id="fInfo">Seleziona filtri → Carica</div>
   </div>
@@ -251,7 +252,8 @@ function updateLoadBtn(){
 function loadData(){
   var date=document.getElementById('fDate').value;
   var plant=document.getElementById('fPlant').value;
-  var commessa=document.getElementById('fCommessa').value.trim().toLowerCase();
+  var fCommessa = document.getElementById('fCommessa').value.trim();
+  var fDestino  = document.getElementById('fDestino').value.trim();
   if(!date||!plant)return;
   currentDate=date;currentPlant=plant;AWB_MAP={};currentData=null;
   setContent(spinnerHtml('Ricerca file...',10));
@@ -265,15 +267,61 @@ function loadData(){
     return downloadFile(files[0].id);
   })
   .then(function(blob){setContent(spinnerHtml('Lettura dati...',65));return parseXlsx(blob);})
-  .then(function(sheets){
-    if(commessa){
-      var md={};
-      (sheets['Intestazione']||{rows:[]}).rows.forEach(function(r){if(r.join('  ').toLowerCase().indexOf(commessa)!==-1)md[norm(r[0])]=true;});
-      SHEET_NAMES.forEach(function(sn){if(sheets[sn])sheets[sn].rows=sheets[sn].rows.filter(function(r){return md[norm(r[0])];});});
-    }
-    currentData=sheets;renderAll(sheets);
-  })
+.then(function(sheets){
+  var intRows = (sheets['Intestazione']||{rows:[]}).rows;
+  
+  // Popola dropdown con valori unici
+  populateFilters(intRows);
+
+  // Filtra per commessa e/o destino
+  if(fCommessa || fDestino) {
+    var md = {};
+    intRows.forEach(function(r) {
+      var c = String(r[7]||'').trim();
+      var d = String(r[8]||'').trim();
+      var okC = !fCommessa || c === fCommessa;
+      var okD = !fDestino  || d === fDestino;
+      if(okC && okD) md[norm(r[0])] = true;
+    });
+    SHEET_NAMES.forEach(function(sn){
+      if(sheets[sn]) sheets[sn].rows = sheets[sn].rows.filter(function(r){
+        return md[norm(r[0])];
+      });
+    });
+  }
+
+  currentData=sheets; renderAll(sheets);
+})
   .catch(function(e){setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>');});
+}
+  function populateFilters(rows) {
+  var commesse = {}, destini = {};
+  rows.forEach(function(r) {
+    var c = String(r[7]||'').trim(); // col H = indice 7
+    var d = String(r[8]||'').trim(); // col I = indice 8
+    if(c) commesse[c] = true;
+    if(d) destini[d] = true;
+  });
+
+  var selC = document.getElementById('fCommessa');
+  var selD = document.getElementById('fDestino');
+  var prevC = selC.value, prevD = selD.value;
+
+  selC.innerHTML = '<option value="">— Tutte —</option>';
+  selD.innerHTML = '<option value="">— Tutti —</option>';
+
+  Object.keys(commesse).sort().forEach(function(v) {
+    var o = document.createElement('option');
+    o.value = v; o.text = v;
+    if(v === prevC) o.selected = true;
+    selC.appendChild(o);
+  });
+  Object.keys(destini).sort().forEach(function(v) {
+    var o = document.createElement('option');
+    o.value = v; o.text = v;
+    if(v === prevD) o.selected = true;
+    selD.appendChild(o);
+  });
 }
 
 function parseXlsx(blob){
