@@ -17,7 +17,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--ff-sans);font-size:14px;overflow-x:hidden}
-/* LOGIN */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 30% 40%,rgba(245,158,11,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(59,130,246,.05) 0%,transparent 60%),var(--bg)}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:52px 56px;text-align:center;max-width:420px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,.5)}
@@ -29,7 +28,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--ff-sans);font-size
 .btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .btn-google svg{width:20px;height:20px;flex-shrink:0}
 .login-note{font-size:11px;color:var(--muted);margin-top:22px;line-height:1.6}
-/* APP */
 #appShell{display:none;flex-direction:column;height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;flex-shrink:0}
 .topbar-logo{font-family:var(--ff-cond);font-size:22px;font-weight:800;letter-spacing:1.5px;color:var(--amber);text-transform:uppercase;flex-shrink:0}
@@ -38,11 +36,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--ff-sans);font-size
 .topbar-sub{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .user-badge{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px;font-size:12px;color:var(--subtle)}
-.user-avatar{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0;object-fit:cover}
-.user-avatar-fallback{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--ff-cond);font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase}
+.user-avatar{width:24px;height:24px;border-radius:50%;flex-shrink:0;object-fit:cover;display:block}
+.user-avatar-fallback{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--ff-cond);font-size:11px;font-weight:700;color:var(--amber)}
 .btn-logout{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--ff-sans);transition:all .2s}
 .btn-logout:hover{color:var(--red);border-color:var(--red)}
-/* AWB PANEL */
 .awb-panel{background:linear-gradient(135deg,#160f00 0%,#1a1500 50%,#0d1117 100%);border-bottom:2px solid var(--amber-dim);padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;flex-shrink:0}
 .awb-label{font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);flex-shrink:0;display:flex;align-items:center;gap:8px}
 .awb-dot{width:8px;height:8px;background:var(--amber);border-radius:50%;animation:pulse 2s infinite}
@@ -58,26 +55,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--ff-sans);font-size
 .awb-status.ok{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.3);display:block}
 .awb-status.err{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3);display:block}
 .awb-status.loading{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.3);display:block}
-/* FILTERS */
 .filters{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;flex-shrink:0}
 .fg{display:flex;flex-direction:column;gap:4px}
 .fl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
 .fc{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 11px;color:var(--text);font-family:var(--ff-sans);font-size:13px;outline:none;cursor:pointer;transition:border-color .2s;min-width:130px}
 .fc:focus{border-color:var(--blue)}
 select.fc option{background:var(--card)}
-.btn-load{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.btn-load{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s;align-self:flex-end}
 .btn-load:hover{background:#2563eb}
 .btn-load:disabled{background:var(--border);cursor:not-allowed}
 .filter-info{margin-left:auto;font-size:11px;color:var(--muted);align-self:flex-end;font-family:var(--ff-mono)}
-/* SCROLL */
+/* COPY TOGGLE */
+.copy-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);user-select:none;cursor:pointer;padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);transition:border-color .2s,color .2s;align-self:flex-end;white-space:nowrap}
+.copy-toggle:hover{border-color:var(--subtle);color:var(--subtle)}
+.copy-toggle input{accent-color:var(--amber);width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.copy-toggle.active{border-color:var(--amber-dim);color:var(--amber)}
+/* TOAST */
+#copyToast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#021a10;font-family:var(--ff-mono);font-size:12px;font-weight:700;padding:9px 18px;border-radius:6px;opacity:0;transform:translateY(10px);transition:opacity .18s,transform .18s;pointer-events:none;z-index:9999;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#copyToast.show{opacity:1;transform:translateY(0)}
 .scroll-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
-/* STATS */
 .stats{display:flex;gap:12px;flex-wrap:wrap}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:120px}
 .sl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .sv{font-family:var(--ff-mono);font-size:24px;font-weight:500;color:var(--text)}
 .sv.amber{color:var(--amber)}
-/* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border)}
 .tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 20px;font-family:var(--ff-sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:-1px}
 .tab:hover{color:var(--text)}
@@ -85,22 +86,23 @@ select.fc option{background:var(--card)}
 .tcnt{display:inline-block;background:var(--border);color:var(--muted);font-family:var(--ff-mono);font-size:10px;padding:1px 6px;border-radius:8px;margin-left:5px;vertical-align:middle}
 .tab.on .tcnt{background:var(--amber-dim);color:var(--amber)}
 .tab-panel{display:none}.tab-panel.on{display:block}
-/* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
 thead tr{background:var(--card);border-bottom:1px solid var(--border)}
-thead tr:first-child th{font-family:var(--ff-mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:7px 11px 3px;border-right:1px solid var(--border);white-space:nowrap}
-thead tr:last-child th{font-family:var(--ff-cond);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--subtle);padding:3px 11px 8px;border-right:1px solid var(--border);white-space:nowrap}
+thead tr:first-child th{font-family:var(--ff-mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:7px 11px 3px;border-right:1px solid var(--border);white-space:nowrap;user-select:none}
+thead tr:last-child th{font-family:var(--ff-cond);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--subtle);padding:3px 11px 8px;border-right:1px solid var(--border);white-space:nowrap;user-select:none}
 thead th:last-child{border-right:none!important}
 tbody tr{border-bottom:1px solid rgba(36,48,72,.7);transition:background .1s}
 tbody tr:hover{background:rgba(255,255,255,.025)}
 tbody tr:last-child{border-bottom:none}
-td{padding:8px 11px;border-right:1px solid rgba(36,48,72,.5);white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+td{padding:8px 11px;border-right:1px solid rgba(36,48,72,.5);white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:default}
 td:last-child{border-right:none}
 td.dn{font-family:var(--ff-mono);font-size:11px;color:var(--subtle)}
 td.awb-val{font-family:var(--ff-mono);font-size:11px;font-weight:500;color:var(--amber)}
-td.awb-empty{color:var(--border);font-size:18px;text-align:center}
-/* STATES */
+td.awb-empty{color:var(--border);font-size:18px;text-align:center;user-select:none}
+/* copy mode */
+body.copy-mode td:not(.awb-empty){cursor:pointer;transition:background .1s,color .1s}
+body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var(--amber)}
 .state{padding:60px 24px;text-align:center;color:var(--muted);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .state-ico{font-size:42px;opacity:.4}
 .state-title{font-weight:600;color:var(--subtle);font-size:15px}
@@ -156,6 +158,10 @@ td.awb-empty{color:var(--border);font-size:18px;text-align:center}
     <div class="fg"><div class="fl">Destino</div><select id="fDestino" class="fc"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Numero ODP</div><select id="fOdp" class="fc"><option value="">— Tutti —</option></select></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
+    <label id="copyToggleLabel" class="copy-toggle">
+      <input type="checkbox" id="copyToggle" onchange="toggleCopyMode(this.checked)">
+      Click per copiare
+    </label>
     <div class="filter-info" id="fInfo">Seleziona filtri → Carica</div>
   </div>
 
@@ -172,21 +178,21 @@ td.awb-empty{color:var(--border);font-size:18px;text-align:center}
   </div>
 </div>
 
+<div id="copyToast">✓ Copiato!</div>
+
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-// ── CONFIG ────────────────────────────────────
-var CLIENT_ID  = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleusercontent.com';
-var FOLDER_ID  = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
+var CLIENT_ID   = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleusercontent.com';
+var FOLDER_ID   = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
 var SHEET_NAMES = ['Intestazione','Dettagli Carico','Dettagli ODP'];
-
 var TOKEN=null, currentData=null, currentDate=null, currentPlant=null, AWB_MAP={};
+var copyModeOn=false, toastTimer=null;
 
 // ── INIT ──────────────────────────────────────
-var tokenClient;
-window.onload = function(){
-  // Prova silent login se abbiamo già dati salvati
-  var saved = getSavedSession();
-  if(saved) {
+window.onload=function(){
+  var saved=getSavedSession();
+  if(saved){
+    // Mostra subito l'app con i dati salvati — non aspetta il token
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appShell').style.display='flex';
     setUserUI(saved.name, saved.email, saved.picture);
@@ -194,28 +200,24 @@ window.onload = function(){
   waitGsi();
 };
 
+var tokenClient;
 function waitGsi(){
   if(typeof google==='undefined'){setTimeout(waitGsi,150);return;}
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/drive',
-    callback: onToken,
-    prompt: ''  // non mostra consent se già autorizzato
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,
+    scope:'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    callback:onToken
   });
-
-  // Se avevamo sessione salvata, tenta silent token refresh
-  var saved = getSavedSession();
-  if(saved) {
+  // Silent refresh se sessione salvata
+  if(getSavedSession()){
     tokenClient.requestAccessToken({prompt:''});
   }
 }
 
-function signIn(){
-  tokenClient.requestAccessToken({prompt:'consent'});
-}
+function signIn(){ tokenClient.requestAccessToken({prompt:'select_account'}); }
 
 function signOut(){
-  if(TOKEN) google.accounts.oauth2.revoke(TOKEN);
+  if(TOKEN) google.accounts.oauth2.revoke(TOKEN,function(){});
   TOKEN=null; currentData=null;
   clearSavedSession();
   document.getElementById('appShell').style.display='none';
@@ -223,70 +225,99 @@ function signOut(){
 }
 
 function onToken(resp){
-  if(resp.error){ 
-    // Silent refresh fallito → mostra login screen
-    document.getElementById('loginScreen').style.display='flex';
-    document.getElementById('appShell').style.display='none';
+  if(resp.error){
+    // Silent refresh fallito: se non c'è sessione mostra login
+    if(!getSavedSession()){
+      document.getElementById('loginScreen').style.display='flex';
+      document.getElementById('appShell').style.display='none';
+    }
     return;
   }
-  TOKEN = resp.access_token;
+  TOKEN=resp.access_token;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo();
   loadDates();
 }
 
-// ── SESSION PERSISTENCE ───────────────────────
-function getSavedSession(){
-  try {
-    var s = localStorage.getItem('wms_session');
-    return s ? JSON.parse(s) : null;
-  } catch(e){ return null; }
-}
-function saveSession(name, email, picture){
-  try { localStorage.setItem('wms_session', JSON.stringify({name:name, email:email, picture:picture})); } catch(e){}
-}
-function clearSavedSession(){
-  try { localStorage.removeItem('wms_session'); } catch(e){}
-}
+// ── SESSION ───────────────────────────────────
+function getSavedSession(){ try{var s=localStorage.getItem('wms_session');return s?JSON.parse(s):null;}catch(e){return null;} }
+function saveSession(n,e,p){ try{localStorage.setItem('wms_session',JSON.stringify({name:n,email:e,picture:p}));}catch(e){} }
+function clearSavedSession(){ try{localStorage.removeItem('wms_session');}catch(e){} }
 
 // ── USER ──────────────────────────────────────
 function loadUserInfo(){
   gFetch('https://www.googleapis.com/oauth2/v2/userinfo').then(function(u){
-    var name = u.name || u.email || '—';
-    var email = u.email || '';
-    var picture = u.picture || '';
-    saveSession(name, email, picture);
-    setUserUI(name, email, picture);
+    if(u.error) return;
+    saveSession(u.name||u.email||'', u.email||'', u.picture||'');
+    setUserUI(u.name||u.email||'—', u.email||'', u.picture||'');
   }).catch(function(){});
 }
 
 function setUserUI(name, email, picture){
-  document.getElementById('userName').textContent = name;
-  var wrap = document.getElementById('userAvatarWrap');
-  wrap.innerHTML = '';
+  document.getElementById('userName').textContent = name||'—';
+  var wrap=document.getElementById('userAvatarWrap');
+  wrap.innerHTML='';
   if(picture){
-    // Prova a caricare la foto; se fallisce mostra iniziale
-    var img = document.createElement('img');
-    img.className = 'user-avatar';
-    img.src = picture;
-    img.alt = name;
-    img.onerror = function(){ wrap.innerHTML = makeInitial(email || name); };
+    var img=document.createElement('img');
+    img.className='user-avatar';
+    img.referrerPolicy='no-referrer'; // fondamentale per foto Google
+    img.crossOrigin='anonymous';
+    img.src=picture;
+    img.alt=name;
+    img.onerror=function(){ wrap.innerHTML=makeInitial(email||name); };
     wrap.appendChild(img);
   } else {
-    wrap.innerHTML = makeInitial(email || name);
+    wrap.innerHTML=makeInitial(email||name);
   }
 }
 
 function makeInitial(str){
-  var initial = str ? str.charAt(0).toUpperCase() : '?';
-  return '<div class="user-avatar-fallback">'+initial+'</div>';
+  // Usa la prima lettera della parte locale della mail, o del nome
+  var src=(str||'?').trim();
+  var ch = src.includes('@') ? src.split('@')[0].charAt(0) : src.charAt(0);
+  return '<div class="user-avatar-fallback">'+ch.toUpperCase()+'</div>';
+}
+
+// ── COPY MODE ─────────────────────────────────
+function toggleCopyMode(on){
+  copyModeOn=on;
+  document.body.classList.toggle('copy-mode',on);
+  document.getElementById('copyToggleLabel').classList.toggle('active',on);
+}
+
+document.addEventListener('click',function(e){
+  if(!copyModeOn) return;
+  var td=e.target.closest('td');
+  if(!td||td.classList.contains('awb-empty')) return;
+  var val=td.textContent.trim();
+  if(!val) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(function(){ showToast(val); }).catch(function(){ fallbackCopy(val); });
+  } else { fallbackCopy(val); }
+});
+
+function fallbackCopy(val){
+  var ta=document.createElement('textarea');
+  ta.value=val; ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+  showToast(val);
+}
+
+function showToast(val){
+  var t=document.getElementById('copyToast');
+  t.textContent='✓ Copiato: '+val;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ t.classList.remove('show'); },1600);
 }
 
 // ── DATE / PLANT ──────────────────────────────
 function loadDates(){
-  var sel = document.getElementById('fDate');
-  sel.innerHTML = '<option>Caricamento...</option>';
+  var sel=document.getElementById('fDate');
+  sel.innerHTML='<option>Caricamento...</option>';
   listFiles('"'+FOLDER_ID+'" in parents and name contains "Spedizioni_Odierne_" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
     var set={};
@@ -317,108 +348,72 @@ function updateLoadBtn(){
   document.getElementById('btnLoad').disabled=!document.getElementById('fDate').value||!document.getElementById('fPlant').value;
 }
 
-// ── POPOLA FILTRI DINAMICI ────────────────────
-function populateFilters(intRows, odpRows){
-  var commesse={}, destini={}, odps={};
-
-  // Da Intestazione: Commessa = col H (indice 7), Destino = col I (indice 8)
+// ── FILTRI DINAMICI ───────────────────────────
+function populateFilters(intRows,odpRows){
+  var commesse={},destini={},odps={};
   intRows.forEach(function(r){
-    var c = String(r[7]||'').trim();
-    var d = String(r[8]||'').trim();
-    if(c) commesse[c]=true;
-    if(d) destini[d]=true;
+    var c=String(r[7]||'').trim(),d=String(r[8]||'').trim();
+    if(c)commesse[c]=true; if(d)destini[d]=true;
   });
-
-  // Da Dettagli ODP: Numero_ODP = col C (indice 2)
-  odpRows.forEach(function(r){
-    var o = String(r[2]||'').trim();
-    if(o) odps[o]=true;
-  });
-
-  fillSelect('fCommessa', commesse, '— Tutte —');
-  fillSelect('fDestino',  destini,  '— Tutti —');
-  fillSelect('fOdp',      odps,     '— Tutti —');
+  odpRows.forEach(function(r){ var o=String(r[2]||'').trim(); if(o)odps[o]=true; });
+  fillSelect('fCommessa',commesse,'— Tutte —');
+  fillSelect('fDestino',destini,'— Tutti —');
+  fillSelect('fOdp',odps,'— Tutti —');
 }
 
-function fillSelect(id, valuesObj, placeholder){
-  var sel = document.getElementById(id);
-  var prev = sel.value;
-  sel.innerHTML = '<option value="">'+placeholder+'</option>';
-  Object.keys(valuesObj).sort().forEach(function(v){
-    var o = document.createElement('option');
-    o.value = v; o.text = v;
-    if(v === prev) o.selected = true;
-    sel.appendChild(o);
+function fillSelect(id,obj,placeholder){
+  var sel=document.getElementById(id),prev=sel.value;
+  sel.innerHTML='<option value="">'+placeholder+'</option>';
+  Object.keys(obj).sort().forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v;o.text=v;if(v===prev)o.selected=true;sel.appendChild(o);
   });
 }
 
 // ── CARICA DATI ───────────────────────────────
 function loadData(){
-  var date     = document.getElementById('fDate').value;
-  var plant    = document.getElementById('fPlant').value;
-  var fCommessa = document.getElementById('fCommessa').value.trim();
-  var fDestino  = document.getElementById('fDestino').value.trim();
-  var fOdp      = document.getElementById('fOdp').value.trim();
-  if(!date||!plant) return;
-  currentDate=date; currentPlant=plant; AWB_MAP={}; currentData=null;
+  var date=document.getElementById('fDate').value;
+  var plant=document.getElementById('fPlant').value;
+  var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fDestino=document.getElementById('fDestino').value.trim();
+  var fOdp=document.getElementById('fOdp').value.trim();
+  if(!date||!plant)return;
+  currentDate=date;currentPlant=plant;AWB_MAP={};currentData=null;
   setContent(spinnerHtml('Ricerca file...',10));
   document.getElementById('statsBar').style.display='none';
   setAwbSt('','');
   var fn='Spedizioni_Odierne_'+date+'_'+plant+'.xlsx';
   listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
   .then(function(files){
-    if(!files.length) throw new Error('File non trovato: '+fn);
+    if(!files.length)throw new Error('File non trovato: '+fn);
     setContent(spinnerHtml('Download file...',30));
     return downloadFile(files[0].id);
   })
-  .then(function(blob){setContent(spinnerHtml('Lettura dati...',65)); return parseXlsx(blob);})
+  .then(function(blob){setContent(spinnerHtml('Lettura dati...',65));return parseXlsx(blob);})
   .then(function(sheets){
-    var intRows = (sheets['Intestazione']||{rows:[]}).rows;
-    var odpRows = (sheets['Dettagli ODP']||{rows:[]}).rows;
-
-    // Popola sempre i dropdown con tutti i valori del file
-    populateFilters(intRows, odpRows);
-
-    // Calcola DocNum da tenere in base ai filtri attivi
-    var md = null; // null = nessun filtro attivo
-
-    // Filtro da Intestazione: Commessa e/o Destino
-    if(fCommessa || fDestino){
-      md = md || {};
+    var intRows=(sheets['Intestazione']||{rows:[]}).rows;
+    var odpRows=(sheets['Dettagli ODP']||{rows:[]}).rows;
+    populateFilters(intRows,odpRows);
+    var md=null;
+    if(fCommessa||fDestino){
+      md={};
       intRows.forEach(function(r){
-        var c = String(r[7]||'').trim();
-        var d = String(r[8]||'').trim();
-        var okC = !fCommessa || c === fCommessa;
-        var okD = !fDestino  || d === fDestino;
-        if(okC && okD) md[norm(r[0])] = true;
+        var c=String(r[7]||'').trim(),d=String(r[8]||'').trim();
+        if((!fCommessa||c===fCommessa)&&(!fDestino||d===fDestino))md[norm(r[0])]=true;
       });
     }
-
-    // Filtro da Dettagli ODP: Numero_ODP → DocNum (col A = indice 0)
     if(fOdp){
-      var mdOdp = {};
-      odpRows.forEach(function(r){
-        var o = String(r[2]||'').trim(); // col C = indice 2
-        if(o === fOdp) mdOdp[norm(r[0])] = true;
-      });
-      if(md){
-        // Intersezione: DocNum deve soddisfare entrambi i filtri
-        Object.keys(md).forEach(function(k){ if(!mdOdp[k]) delete md[k]; });
-      } else {
-        md = mdOdp;
-      }
+      var mdOdp={};
+      odpRows.forEach(function(r){if(String(r[2]||'').trim()===fOdp)mdOdp[norm(r[0])]=true;});
+      if(md){Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];});}
+      else md=mdOdp;
     }
-
-    // Applica filtro DocNum a tutte e 3 le sheet
     if(md){
       SHEET_NAMES.forEach(function(sn){
-        if(sheets[sn]) sheets[sn].rows = sheets[sn].rows.filter(function(r){
-          return md[norm(r[0])];
-        });
+        if(sheets[sn])sheets[sn].rows=sheets[sn].rows.filter(function(r){return md[norm(r[0])];});
       });
     }
-
-    currentData=sheets; renderAll(sheets);
+    currentData=sheets;renderAll(sheets);
   })
   .catch(function(e){setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>');});
 }
@@ -441,7 +436,7 @@ function parseXlsx(blob){
         resolve(out);
       }catch(err){reject(err);}
     };
-    reader.onerror=reject; reader.readAsArrayBuffer(blob);
+    reader.onerror=reject;reader.readAsArrayBuffer(blob);
   });
 }
 
@@ -508,7 +503,7 @@ function applyAwb(){
   var fn='Spedizioni_Odierne_'+currentDate+'_'+currentPlant+'.xlsx';
   listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
   .then(function(files){
-    if(!files.length) throw new Error('File non trovato: '+fn);
+    if(!files.length)throw new Error('File non trovato: '+fn);
     setAwbSt('loading','⏳ Modifica AWB...');
     return downloadFile(files[0].id).then(function(blob){return{blob:blob,fid:files[0].id};});
   })
@@ -537,19 +532,19 @@ function modifyAwb(blob,docNums,awbValue){
       try{
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
         var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()==='intestazione';});
-        if(!rn) throw new Error('Sheet Intestazione non trovato');
+        if(!rn)throw new Error('Sheet Intestazione non trovato');
         var ws=wb.Sheets[rn];
         var range=XLSX.utils.decode_range(ws['!ref']||'A1');
         var ds={};docNums.forEach(function(d){ds[d]=true;});
         for(var r=2;r<=range.e.r;r++){
           var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
-          if(ca&&ds[norm(ca.v)]) ws[XLSX.utils.encode_cell({r:r,c:3})]={t:'s',v:awbValue};
+          if(ca&&ds[norm(ca.v)])ws[XLSX.utils.encode_cell({r:r,c:3})]={t:'s',v:awbValue};
         }
         var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
         resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       }catch(err){reject(err);}
     };
-    reader.onerror=reject; reader.readAsArrayBuffer(blob);
+    reader.onerror=reject;reader.readAsArrayBuffer(blob);
   });
 }
 
@@ -566,7 +561,7 @@ function uploadFile(fileId,blob,name){
   }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error('Upload: '+t);});return r.json();});
 }
 function gFetch(url){
-  if(!TOKEN) return Promise.reject(new Error('No token'));
+  if(!TOKEN)return Promise.reject(new Error('No token'));
   return fetch(url,{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){return r.json();});
 }
 
