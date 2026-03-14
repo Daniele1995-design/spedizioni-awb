@@ -516,7 +516,7 @@ function downloadFiltered(){
     XLSX.utils.book_append_sheet(wb,ws,sn);
   });
   var d=currentDate||'';
-  var parts=['Spedizioni',d.substr(4,2)+d.substr(0,4)+d.substr(6,2)];
+  var parts=['Spedizioni',d.substr(6,2)+d.substr(4,2)+d.substr(0,4)];
   var fPlant   =document.getElementById('fPlant').value.trim();
   var fCommessa=document.getElementById('fCommessa').value.trim();
   var fDestino =document.getElementById('fDestino').value.trim();
