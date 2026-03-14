@@ -157,6 +157,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange();loadData()"><option>Caricamento...</option></select></div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
+    <div class="fg"><div class="fl">Tipo Spedizione</div><select id="fTipo" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listDestino"></datalist></div>
     <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listOdp"></datalist></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
@@ -328,6 +329,7 @@ function loadData(){
   var date=document.getElementById('fDate').value; if(!date)return;
   var fPlant   =document.getElementById('fPlant').value.trim();
   var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fTipo    =document.getElementById('fTipo').value.trim();
   var fDestino =document.getElementById('fDestino').value.trim();
   var fOdp     =document.getElementById('fOdp').value.trim();
   currentDate=date; AWB_MAP={}; currentData=null; currentFileIds={};
@@ -376,7 +378,7 @@ function loadData(){
     populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
 
     // Applica filtri
-    var md=applyFilters(merged,fPlant,fCommessa,fDestino,fOdp);
+    var md=applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fOdp);
     if(md){
       SHEET_NAMES.forEach(function(sn){
         merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; });
@@ -393,30 +395,23 @@ function loadData(){
 }
 
 // Calcola il set di DocNum da tenere in base ai filtri
-function applyFilters(merged,fPlant,fCommessa,fDestino,fOdp){
+function applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fOdp){
   var intRows=(merged['Intestazione']||{rows:[]}).rows;
   var odpRows=(merged['Dettagli ODP']||{rows:[]}).rows;
   var md=null;
-
-  // Plant = col F = indice 5
   if(fPlant){
     md=md||{};
-    intRows.forEach(function(r){
-      if(String(r[5]||'').trim()===fPlant) md[norm(r[0])]=true;
-    });
+    intRows.forEach(function(r){ if(String(r[5]||'').trim()===fPlant) md[norm(r[0])]=true; });
   }
-  // Commessa = col H = indice 7
-  // Destino  = col I = indice 8
-  if(fCommessa||fDestino){
-    var mdCD={};
+  if(fCommessa||fTipo||fDestino){
+    var mdC={};
     intRows.forEach(function(r){
-      var c=String(r[7]||'').trim(), d=String(r[8]||'').trim();
-      if((!fCommessa||c===fCommessa)&&(!fDestino||d===fDestino)) mdCD[norm(r[0])]=true;
+      var c=String(r[7]||'').trim(),t=String(r[6]||'').trim(),d=String(r[8]||'').trim();
+      if((!fCommessa||c===fCommessa)&&(!fTipo||t===fTipo)&&(!fDestino||d===fDestino)) mdC[norm(r[0])]=true;
     });
-    if(md){ Object.keys(md).forEach(function(k){if(!mdCD[k])delete md[k];}); }
-    else md=mdCD;
+    if(md){ Object.keys(md).forEach(function(k){if(!mdC[k])delete md[k];}); }
+    else md=mdC;
   }
-  // ODP = col C = indice 2 di Dettagli ODP
   if(fOdp){
     var mdOdp={};
     odpRows.forEach(function(r){ if(String(r[2]||'').trim()===fOdp) mdOdp[norm(r[0])]=true; });
@@ -433,6 +428,7 @@ function refreshData(){
   btn.classList.add('spin'); btn.disabled=true;
   var fPlant   =document.getElementById('fPlant').value.trim();
   var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fTipo    =document.getElementById('fTipo').value.trim();
   var fDestino =document.getElementById('fDestino').value.trim();
   var fOdp     =document.getElementById('fOdp').value.trim();
 
@@ -462,7 +458,7 @@ function refreshData(){
       headersSet=true;
     });
     populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
-    var md=applyFilters(merged,fPlant,fCommessa,fDestino,fOdp);
+    var md=applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fOdp);
     if(md){ SHEET_NAMES.forEach(function(sn){ merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; }); }); }
     currentData=merged;
     document.getElementById('sFiles').textContent=parsed.length;
@@ -475,16 +471,18 @@ function refreshData(){
 
 // ── FILTRI DINAMICI ───────────────────────────
 function populateFilters(intRows,odpRows){
-  var plants={},commesse={},destini={},odps={};
+  var plants={},commesse={},tipi={},destini={},odps={};
   intRows.forEach(function(r){
-    var p=String(r[5]||'').trim(); // col F
-    var c=String(r[7]||'').trim(); // col H
-    var d=String(r[8]||'').trim(); // col I
-    if(p)plants[p]=true; if(c)commesse[c]=true; if(d)destini[d]=true;
+    var p=String(r[5]||'').trim(); // col F Plant
+    var c=String(r[7]||'').trim(); // col H Commessa
+    var t=String(r[6]||'').trim(); // col G Tipo_Spedizione
+    var d=String(r[8]||'').trim(); // col I Destino
+    if(p)plants[p]=true; if(c)commesse[c]=true; if(t)tipi[t]=true; if(d)destini[d]=true;
   });
   odpRows.forEach(function(r){ var o=String(r[2]||'').trim(); if(o)odps[o]=true; });
   fillSelect('fPlant',plants,'— Tutti —');
   fillSelect('fCommessa',commesse,'— Tutte —');
+  fillSelect('fTipo',tipi,'— Tutti —');
   fillDatalist('listDestino',destini);
   fillDatalist('listOdp',odps);
 }
