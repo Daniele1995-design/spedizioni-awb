@@ -68,6 +68,9 @@ select.fc option{background:var(--card)}
 .btn-refresh:hover{border-color:var(--green);color:var(--green)}
 .btn-refresh:disabled{opacity:.3;cursor:not-allowed}
 .btn-refresh.spin{display:inline-block;animation:spin .7s linear infinite}
+.btn-download{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end}
+.btn-download:hover{border-color:var(--amber);color:var(--amber)}
+.btn-download:disabled{opacity:.3;cursor:not-allowed}
 .filter-info{margin-left:auto;font-size:11px;color:var(--muted);align-self:flex-end;font-family:var(--ff-mono)}
 /* COPY TOGGLE */
 .copy-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);user-select:none;cursor:pointer;padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);transition:border-color .2s,color .2s;align-self:flex-end;white-space:nowrap}
@@ -149,7 +152,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="awb-panel">
     <div class="awb-label"><div class="awb-dot"></div>Inserisci AWB</div>
     <div class="awb-wrap">
-      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare alle righe" maxlength="60">
+      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare a tutte le righe filtrate" maxlength="60">
       <button class="btn-awb" id="btnAwb" onclick="applyAwb()">Applica AWB</button>
     </div>
     <div id="awbStatus" class="awb-status"></div>
@@ -163,6 +166,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listOdp"></datalist></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dati dal file">↻ Aggiorna</button>
+    <button class="btn-download" id="btnDownload" onclick="downloadFiltered()" disabled title="Scarica Excel con i filtri attivi">⬇ Scarica Excel</button>
     <label id="copyToggleLabel" class="copy-toggle">
       <input type="checkbox" id="copyToggle" onchange="toggleCopyMode(this.checked)">
       Click per copiare
@@ -432,6 +436,7 @@ function loadData(){
     }
     currentData=sheets;renderAll(sheets);
     document.getElementById('btnRefresh').disabled=false;
+    document.getElementById('btnDownload').disabled=false;
   })
   .catch(function(e){setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>');});
 }
@@ -482,6 +487,24 @@ function refreshData(){
     btn.classList.remove('spin'); btn.disabled=false;
     showToast('✗ Errore aggiornamento');
   });
+}
+
+// ── DOWNLOAD EXCEL FILTRATO ───────────────────
+function downloadFiltered(){
+  if(!currentData) return;
+  var wb = XLSX.utils.book_new();
+  SHEET_NAMES.forEach(function(sn){
+    var sd = currentData[sn]||{headers:[],rows:[]};
+    var wsData = [];
+    if(sd.headers[0]) wsData.push(sd.headers[0]);
+    if(sd.headers[1]) wsData.push(sd.headers[1]);
+    sd.rows.forEach(function(r){ wsData.push(r); });
+    var ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, sn);
+  });
+  var d = currentDate||'';
+  var fname = 'Spedizioni_'+currentPlant+'_'+d.substr(6,2)+d.substr(4,2)+d.substr(0,4)+'.xlsx';
+  XLSX.writeFile(wb, fname);
 }
 
 function parseXlsx(blob){
