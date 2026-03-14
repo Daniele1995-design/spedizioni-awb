@@ -38,7 +38,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--ff-sans);font-size
 .topbar-sub{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .user-badge{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px;font-size:12px;color:var(--subtle)}
-.user-avatar{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0;object-fit:cover}
+.user-avatar-fallback{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--ff-cond);font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase}
 .btn-logout{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--ff-sans);transition:all .2s}
 .btn-logout:hover{color:var(--red);border-color:var(--red)}
 /* AWB PANEL */
@@ -132,7 +133,7 @@ td.awb-empty{color:var(--border);font-size:18px;text-align:center}
     <div class="topbar-sub">Bollettazione AWB</div>
     <div class="topbar-right">
       <div class="user-badge">
-        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <div id="userAvatarWrap"></div>
         <span id="userName">—</span>
       </div>
       <button class="btn-logout" onclick="signOut()">Esci</button>
@@ -153,6 +154,7 @@ td.awb-empty{color:var(--border);font-size:18px;text-align:center}
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="updateLoadBtn()"><option value="">— Seleziona —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc"><option value="">— Tutte —</option></select></div>
     <div class="fg"><div class="fl">Destino</div><select id="fDestino" class="fc"><option value="">— Tutti —</option></select></div>
+    <div class="fg"><div class="fl">Numero ODP</div><select id="fOdp" class="fc"><option value="">— Tutti —</option></select></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <div class="filter-info" id="fInfo">Seleziona filtri → Carica</div>
   </div>
@@ -173,53 +175,118 @@ td.awb-empty{color:var(--border);font-size:18px;text-align:center}
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 // ── CONFIG ────────────────────────────────────
-var CLIENT_ID   = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleusercontent.com';
-var FOLDER_ID   = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
+var CLIENT_ID  = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleusercontent.com';
+var FOLDER_ID  = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
 var SHEET_NAMES = ['Intestazione','Dettagli Carico','Dettagli ODP'];
 
 var TOKEN=null, currentData=null, currentDate=null, currentPlant=null, AWB_MAP={};
 
 // ── INIT ──────────────────────────────────────
 var tokenClient;
-window.onload=function(){waitGsi();};
+window.onload = function(){
+  // Prova silent login se abbiamo già dati salvati
+  var saved = getSavedSession();
+  if(saved) {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appShell').style.display='flex';
+    setUserUI(saved.name, saved.email, saved.picture);
+  }
+  waitGsi();
+};
+
 function waitGsi(){
   if(typeof google==='undefined'){setTimeout(waitGsi,150);return;}
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/drive',
-    callback:onToken
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/drive',
+    callback: onToken,
+    prompt: ''  // non mostra consent se già autorizzato
   });
+
+  // Se avevamo sessione salvata, tenta silent token refresh
+  var saved = getSavedSession();
+  if(saved) {
+    tokenClient.requestAccessToken({prompt:''});
+  }
 }
-function signIn(){tokenClient.requestAccessToken();}
+
+function signIn(){
+  tokenClient.requestAccessToken({prompt:'consent'});
+}
+
 function signOut(){
   if(TOKEN) google.accounts.oauth2.revoke(TOKEN);
-  TOKEN=null;currentData=null;
+  TOKEN=null; currentData=null;
+  clearSavedSession();
   document.getElementById('appShell').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
 }
+
 function onToken(resp){
-  if(resp.error){alert('Errore: '+resp.error);return;}
-  TOKEN=resp.access_token;
+  if(resp.error){ 
+    // Silent refresh fallito → mostra login screen
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('appShell').style.display='none';
+    return;
+  }
+  TOKEN = resp.access_token;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
-  loadUserInfo();loadDates();
-    // DEBUG: stampa i file trovati nella cartella
-  listFiles('"'+FOLDER_ID+'" in parents and trashed=false')
-    .then(function(f){ console.log('File nella cartella:', f); });
+  loadUserInfo();
+  loadDates();
+}
+
+// ── SESSION PERSISTENCE ───────────────────────
+function getSavedSession(){
+  try {
+    var s = localStorage.getItem('wms_session');
+    return s ? JSON.parse(s) : null;
+  } catch(e){ return null; }
+}
+function saveSession(name, email, picture){
+  try { localStorage.setItem('wms_session', JSON.stringify({name:name, email:email, picture:picture})); } catch(e){}
+}
+function clearSavedSession(){
+  try { localStorage.removeItem('wms_session'); } catch(e){}
 }
 
 // ── USER ──────────────────────────────────────
 function loadUserInfo(){
   gFetch('https://www.googleapis.com/oauth2/v2/userinfo').then(function(u){
-    document.getElementById('userName').textContent=u.name||u.email||'—';
-    if(u.picture) document.getElementById('userAvatar').src=u.picture;
+    var name = u.name || u.email || '—';
+    var email = u.email || '';
+    var picture = u.picture || '';
+    saveSession(name, email, picture);
+    setUserUI(name, email, picture);
   }).catch(function(){});
+}
+
+function setUserUI(name, email, picture){
+  document.getElementById('userName').textContent = name;
+  var wrap = document.getElementById('userAvatarWrap');
+  wrap.innerHTML = '';
+  if(picture){
+    // Prova a caricare la foto; se fallisce mostra iniziale
+    var img = document.createElement('img');
+    img.className = 'user-avatar';
+    img.src = picture;
+    img.alt = name;
+    img.onerror = function(){ wrap.innerHTML = makeInitial(email || name); };
+    wrap.appendChild(img);
+  } else {
+    wrap.innerHTML = makeInitial(email || name);
+  }
+}
+
+function makeInitial(str){
+  var initial = str ? str.charAt(0).toUpperCase() : '?';
+  return '<div class="user-avatar-fallback">'+initial+'</div>';
 }
 
 // ── DATE / PLANT ──────────────────────────────
 function loadDates(){
-  var sel=document.getElementById('fDate');
-  sel.innerHTML='<option>Caricamento...</option>';
+  var sel = document.getElementById('fDate');
+  sel.innerHTML = '<option>Caricamento...</option>';
   listFiles('"'+FOLDER_ID+'" in parents and name contains "Spedizioni_Odierne_" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
     var set={};
@@ -231,97 +298,129 @@ function loadDates(){
     else sel.innerHTML='<option value="">Nessun file trovato</option>';
   }).catch(function(){sel.innerHTML='<option>Errore</option>';});
 }
+
 function onDateChange(){
-  var date=document.getElementById('fDate').value;if(!date)return;
-  var ps=document.getElementById('fPlant');ps.innerHTML='<option>Caricamento...</option>';
+  var date=document.getElementById('fDate').value; if(!date)return;
+  var ps=document.getElementById('fPlant'); ps.innerHTML='<option>Caricamento...</option>';
   listFiles('"'+FOLDER_ID+'" in parents and name contains "Spedizioni_Odierne_'+date+'_" and trashed=false')
   .then(function(files){
     var plants=[];
     files.forEach(function(f){var m=f.name.match(/Spedizioni_Odierne_\d{8}_(.+)\.xlsx$/i);if(m&&plants.indexOf(m[1])===-1)plants.push(m[1]);});
-    plants.sort();ps.innerHTML='';
+    plants.sort(); ps.innerHTML='';
     plants.forEach(function(p){var o=document.createElement('option');o.value=p;o.text=p;ps.appendChild(o);});
     if(plants.length===1)ps.selectedIndex=0;
     updateLoadBtn();
   }).catch(function(){ps.innerHTML='<option value="">Errore</option>';});
 }
+
 function updateLoadBtn(){
   document.getElementById('btnLoad').disabled=!document.getElementById('fDate').value||!document.getElementById('fPlant').value;
 }
 
+// ── POPOLA FILTRI DINAMICI ────────────────────
+function populateFilters(intRows, odpRows){
+  var commesse={}, destini={}, odps={};
+
+  // Da Intestazione: Commessa = col H (indice 7), Destino = col I (indice 8)
+  intRows.forEach(function(r){
+    var c = String(r[7]||'').trim();
+    var d = String(r[8]||'').trim();
+    if(c) commesse[c]=true;
+    if(d) destini[d]=true;
+  });
+
+  // Da Dettagli ODP: Numero_ODP = col C (indice 2)
+  odpRows.forEach(function(r){
+    var o = String(r[2]||'').trim();
+    if(o) odps[o]=true;
+  });
+
+  fillSelect('fCommessa', commesse, '— Tutte —');
+  fillSelect('fDestino',  destini,  '— Tutti —');
+  fillSelect('fOdp',      odps,     '— Tutti —');
+}
+
+function fillSelect(id, valuesObj, placeholder){
+  var sel = document.getElementById(id);
+  var prev = sel.value;
+  sel.innerHTML = '<option value="">'+placeholder+'</option>';
+  Object.keys(valuesObj).sort().forEach(function(v){
+    var o = document.createElement('option');
+    o.value = v; o.text = v;
+    if(v === prev) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
 // ── CARICA DATI ───────────────────────────────
 function loadData(){
-  var date=document.getElementById('fDate').value;
-  var plant=document.getElementById('fPlant').value;
+  var date     = document.getElementById('fDate').value;
+  var plant    = document.getElementById('fPlant').value;
   var fCommessa = document.getElementById('fCommessa').value.trim();
   var fDestino  = document.getElementById('fDestino').value.trim();
-  if(!date||!plant)return;
-  currentDate=date;currentPlant=plant;AWB_MAP={};currentData=null;
+  var fOdp      = document.getElementById('fOdp').value.trim();
+  if(!date||!plant) return;
+  currentDate=date; currentPlant=plant; AWB_MAP={}; currentData=null;
   setContent(spinnerHtml('Ricerca file...',10));
   document.getElementById('statsBar').style.display='none';
   setAwbSt('','');
   var fn='Spedizioni_Odierne_'+date+'_'+plant+'.xlsx';
   listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
   .then(function(files){
-    if(!files.length)throw new Error('File non trovato: '+fn);
+    if(!files.length) throw new Error('File non trovato: '+fn);
     setContent(spinnerHtml('Download file...',30));
     return downloadFile(files[0].id);
   })
-  .then(function(blob){setContent(spinnerHtml('Lettura dati...',65));return parseXlsx(blob);})
-.then(function(sheets){
-  var intRows = (sheets['Intestazione']||{rows:[]}).rows;
-  
-  // Popola dropdown con valori unici
-  populateFilters(intRows);
+  .then(function(blob){setContent(spinnerHtml('Lettura dati...',65)); return parseXlsx(blob);})
+  .then(function(sheets){
+    var intRows = (sheets['Intestazione']||{rows:[]}).rows;
+    var odpRows = (sheets['Dettagli ODP']||{rows:[]}).rows;
 
-  // Filtra per commessa e/o destino
-  if(fCommessa || fDestino) {
-    var md = {};
-    intRows.forEach(function(r) {
-      var c = String(r[7]||'').trim();
-      var d = String(r[8]||'').trim();
-      var okC = !fCommessa || c === fCommessa;
-      var okD = !fDestino  || d === fDestino;
-      if(okC && okD) md[norm(r[0])] = true;
-    });
-    SHEET_NAMES.forEach(function(sn){
-      if(sheets[sn]) sheets[sn].rows = sheets[sn].rows.filter(function(r){
-        return md[norm(r[0])];
+    // Popola sempre i dropdown con tutti i valori del file
+    populateFilters(intRows, odpRows);
+
+    // Calcola DocNum da tenere in base ai filtri attivi
+    var md = null; // null = nessun filtro attivo
+
+    // Filtro da Intestazione: Commessa e/o Destino
+    if(fCommessa || fDestino){
+      md = md || {};
+      intRows.forEach(function(r){
+        var c = String(r[7]||'').trim();
+        var d = String(r[8]||'').trim();
+        var okC = !fCommessa || c === fCommessa;
+        var okD = !fDestino  || d === fDestino;
+        if(okC && okD) md[norm(r[0])] = true;
       });
-    });
-  }
+    }
 
-  currentData=sheets; renderAll(sheets);
-})
+    // Filtro da Dettagli ODP: Numero_ODP → DocNum (col A = indice 0)
+    if(fOdp){
+      var mdOdp = {};
+      odpRows.forEach(function(r){
+        var o = String(r[2]||'').trim(); // col C = indice 2
+        if(o === fOdp) mdOdp[norm(r[0])] = true;
+      });
+      if(md){
+        // Intersezione: DocNum deve soddisfare entrambi i filtri
+        Object.keys(md).forEach(function(k){ if(!mdOdp[k]) delete md[k]; });
+      } else {
+        md = mdOdp;
+      }
+    }
+
+    // Applica filtro DocNum a tutte e 3 le sheet
+    if(md){
+      SHEET_NAMES.forEach(function(sn){
+        if(sheets[sn]) sheets[sn].rows = sheets[sn].rows.filter(function(r){
+          return md[norm(r[0])];
+        });
+      });
+    }
+
+    currentData=sheets; renderAll(sheets);
+  })
   .catch(function(e){setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>');});
-}
-  function populateFilters(rows) {
-  var commesse = {}, destini = {};
-  rows.forEach(function(r) {
-    var c = String(r[7]||'').trim(); // col H = indice 7
-    var d = String(r[8]||'').trim(); // col I = indice 8
-    if(c) commesse[c] = true;
-    if(d) destini[d] = true;
-  });
-
-  var selC = document.getElementById('fCommessa');
-  var selD = document.getElementById('fDestino');
-  var prevC = selC.value, prevD = selD.value;
-
-  selC.innerHTML = '<option value="">— Tutte —</option>';
-  selD.innerHTML = '<option value="">— Tutti —</option>';
-
-  Object.keys(commesse).sort().forEach(function(v) {
-    var o = document.createElement('option');
-    o.value = v; o.text = v;
-    if(v === prevC) o.selected = true;
-    selC.appendChild(o);
-  });
-  Object.keys(destini).sort().forEach(function(v) {
-    var o = document.createElement('option');
-    o.value = v; o.text = v;
-    if(v === prevD) o.selected = true;
-    selD.appendChild(o);
-  });
 }
 
 function parseXlsx(blob){
@@ -342,7 +441,7 @@ function parseXlsx(blob){
         resolve(out);
       }catch(err){reject(err);}
     };
-    reader.onerror=reject;reader.readAsArrayBuffer(blob);
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
 
@@ -409,7 +508,7 @@ function applyAwb(){
   var fn='Spedizioni_Odierne_'+currentDate+'_'+currentPlant+'.xlsx';
   listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
   .then(function(files){
-    if(!files.length)throw new Error('File non trovato: '+fn);
+    if(!files.length) throw new Error('File non trovato: '+fn);
     setAwbSt('loading','⏳ Modifica AWB...');
     return downloadFile(files[0].id).then(function(blob){return{blob:blob,fid:files[0].id};});
   })
@@ -438,19 +537,19 @@ function modifyAwb(blob,docNums,awbValue){
       try{
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
         var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()==='intestazione';});
-        if(!rn)throw new Error('Sheet Intestazione non trovato');
+        if(!rn) throw new Error('Sheet Intestazione non trovato');
         var ws=wb.Sheets[rn];
         var range=XLSX.utils.decode_range(ws['!ref']||'A1');
         var ds={};docNums.forEach(function(d){ds[d]=true;});
         for(var r=2;r<=range.e.r;r++){
           var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
-          if(ca&&ds[norm(ca.v)])ws[XLSX.utils.encode_cell({r:r,c:3})]={t:'s',v:awbValue};
+          if(ca&&ds[norm(ca.v)]) ws[XLSX.utils.encode_cell({r:r,c:3})]={t:'s',v:awbValue};
         }
         var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
         resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       }catch(err){reject(err);}
     };
-    reader.onerror=reject;reader.readAsArrayBuffer(blob);
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
 
@@ -466,7 +565,10 @@ function uploadFile(fileId,blob,name){
     return fetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=multipart',{method:'PATCH',headers:{Authorization:'Bearer '+TOKEN,'Content-Type':'multipart/related; boundary='+boundary},body:body});
   }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error('Upload: '+t);});return r.json();});
 }
-function gFetch(url){return fetch(url,{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){return r.json();});}
+function gFetch(url){
+  if(!TOKEN) return Promise.reject(new Error('No token'));
+  return fetch(url,{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){return r.json();});
+}
 
 // ── UTILITY ───────────────────────────────────
 function setContent(h){document.getElementById('content').innerHTML=h;}
