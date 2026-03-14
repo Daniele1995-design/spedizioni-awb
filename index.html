@@ -64,6 +64,10 @@ select.fc option{background:var(--card)}
 .btn-load{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s;align-self:flex-end}
 .btn-load:hover{background:#2563eb}
 .btn-load:disabled{background:var(--border);cursor:not-allowed}
+.btn-refresh{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end}
+.btn-refresh:hover{border-color:var(--green);color:var(--green)}
+.btn-refresh:disabled{opacity:.3;cursor:not-allowed}
+.btn-refresh.spin{display:inline-block;animation:spin .7s linear infinite}
 .filter-info{margin-left:auto;font-size:11px;color:var(--muted);align-self:flex-end;font-family:var(--ff-mono)}
 /* COPY TOGGLE */
 .copy-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);user-select:none;cursor:pointer;padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);transition:border-color .2s,color .2s;align-self:flex-end;white-space:nowrap}
@@ -154,10 +158,11 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="filters">
     <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange()"><option>Caricamento...</option></select></div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="updateLoadBtn()"><option value="">— Seleziona —</option></select></div>
-    <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc"><option value="">— Tutte —</option></select></div>
-    <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px"><datalist id="listDestino"></datalist></div>
-    <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px"><datalist id="listOdp"></datalist></div>
+    <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
+    <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listDestino"></datalist></div>
+    <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listOdp"></datalist></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
+    <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dati dal file">↻ Aggiorna</button>
     <label id="copyToggleLabel" class="copy-toggle">
       <input type="checkbox" id="copyToggle" onchange="toggleCopyMode(this.checked)">
       Click per copiare
@@ -426,11 +431,60 @@ function loadData(){
       });
     }
     currentData=sheets;renderAll(sheets);
+    document.getElementById('btnRefresh').disabled=false;
   })
   .catch(function(e){setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>');});
 }
 
-function parseXlsx(blob){
+// ── AGGIORNA (ricarica senza resettare filtri) ─
+function refreshData(){
+  if(!currentDate||!currentPlant)return;
+  var btn=document.getElementById('btnRefresh');
+  btn.classList.add('spin'); btn.disabled=true;
+  var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fDestino=document.getElementById('fDestino').value.trim();
+  var fOdp=document.getElementById('fOdp').value.trim();
+  var fn='Spedizioni_Odierne_'+currentDate+'_'+currentPlant+'.xlsx';
+  listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
+  .then(function(files){
+    if(!files.length)throw new Error('File non trovato');
+    return downloadFile(files[0].id);
+  })
+  .then(function(blob){return parseXlsx(blob);})
+  .then(function(sheets){
+    var intRows=(sheets['Intestazione']||{rows:[]}).rows;
+    var odpRows=(sheets['Dettagli ODP']||{rows:[]}).rows;
+    populateFilters(intRows,odpRows);
+    var md=null;
+    if(fCommessa||fDestino){
+      md={};
+      intRows.forEach(function(r){
+        var c=String(r[7]||'').trim(),d=String(r[8]||'').trim();
+        if((!fCommessa||c===fCommessa)&&(!fDestino||d===fDestino))md[norm(r[0])]=true;
+      });
+    }
+    if(fOdp){
+      var mdOdp={};
+      odpRows.forEach(function(r){if(String(r[2]||'').trim()===fOdp)mdOdp[norm(r[0])]=true;});
+      if(md){Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];});}
+      else md=mdOdp;
+    }
+    if(md){
+      SHEET_NAMES.forEach(function(sn){
+        if(sheets[sn])sheets[sn].rows=sheets[sn].rows.filter(function(r){return md[norm(r[0])];});
+      });
+    }
+    currentData=sheets; renderAll(sheets);
+    btn.classList.remove('spin'); btn.disabled=false;
+    showToast('✓ Dati aggiornati');
+  })
+  .catch(function(e){
+    btn.classList.remove('spin'); btn.disabled=false;
+    showToast('✗ Errore aggiornamento');
+  });
+}
+
+
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
     reader.onload=function(e){
