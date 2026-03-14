@@ -516,7 +516,14 @@ function downloadFiltered(){
     XLSX.utils.book_append_sheet(wb,ws,sn);
   });
   var d=currentDate||'';
-  var fname='Spedizioni_'+d.substr(6,2)+d.substr(4,2)+d.substr(0,4)+'.xlsx';
+  var parts=['Spedizioni',d.substr(6,2)+d.substr(4,2)+d.substr(0,4)];
+  var fPlant   =document.getElementById('fPlant').value.trim();
+  var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fDestino =document.getElementById('fDestino').value.trim();
+  if(fPlant)    parts.push(fPlant);
+  if(fCommessa) parts.push(fCommessa);
+  if(fDestino)  parts.push(fDestino.replace(/[\/\\:*?"<>|]/g,'_'));
+  var fname=parts.join('_')+'.xlsx';
   XLSX.writeFile(wb,fname);
 }
 
@@ -548,7 +555,11 @@ function renderAll(sheets){
   var int=sheets['Intestazione']||{headers:[],rows:[]};
   var car=sheets['Dettagli Carico']||{headers:[],rows:[]};
   var odp=sheets['Dettagli ODP']||{headers:[],rows:[]};
-  var awbCnt=int.rows.filter(function(r){return AWB_MAP[norm(r[0])];}).length;
+  // Conta righe con AWB: prima guarda AWB_MAP (appena applicato), poi col D (indice 3) dal file
+  var awbCnt=int.rows.filter(function(r){
+    var dn=norm(r[0]);
+    return AWB_MAP[dn]||(String(r[3]||'').trim()!=='');
+  }).length;
   document.getElementById('sDoc').textContent=int.rows.length;
   document.getElementById('sCar').textContent=car.rows.length;
   document.getElementById('sOdp').textContent=odp.rows.length;
