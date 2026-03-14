@@ -64,21 +64,17 @@ select.fc option{background:var(--card)}
 .btn-load{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s;align-self:flex-end}
 .btn-load:hover{background:#2563eb}
 .btn-load:disabled{background:var(--border);cursor:not-allowed}
-.btn-refresh{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end}
+.btn-refresh,.btn-download{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end}
 .btn-refresh:hover{border-color:var(--green);color:var(--green)}
-.btn-refresh:disabled{opacity:.3;cursor:not-allowed}
-.btn-refresh.spin{display:inline-block;animation:spin .7s linear infinite}
-.btn-download{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end}
 .btn-download:hover{border-color:var(--amber);color:var(--amber)}
-.btn-download:disabled{opacity:.3;cursor:not-allowed}
-.filter-info{margin-left:auto;font-size:11px;color:var(--muted);align-self:flex-end;font-family:var(--ff-mono)}
-/* COPY TOGGLE */
+.btn-refresh:disabled,.btn-download:disabled{opacity:.3;cursor:not-allowed}
+.btn-refresh.spin{animation:spin .7s linear infinite}
 .copy-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);user-select:none;cursor:pointer;padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);transition:border-color .2s,color .2s;align-self:flex-end;white-space:nowrap}
 .copy-toggle:hover{border-color:var(--subtle);color:var(--subtle)}
 .copy-toggle input{accent-color:var(--amber);width:13px;height:13px;cursor:pointer;flex-shrink:0}
 .copy-toggle.active{border-color:var(--amber-dim);color:var(--amber)}
-/* TOAST */
-#copyToast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#021a10;font-family:var(--ff-mono);font-size:12px;font-weight:700;padding:9px 18px;border-radius:6px;opacity:0;transform:translateY(10px);transition:opacity .18s,transform .18s;pointer-events:none;z-index:9999;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filter-info{margin-left:auto;font-size:11px;color:var(--muted);align-self:flex-end;font-family:var(--ff-mono)}
+#copyToast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#021a10;font-family:var(--ff-mono);font-size:12px;font-weight:700;padding:9px 18px;border-radius:6px;opacity:0;transform:translateY(10px);transition:opacity .18s,transform .18s;pointer-events:none;z-index:9999;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #copyToast.show{opacity:1;transform:translateY(0)}
 .scroll-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
 .stats{display:flex;gap:12px;flex-wrap:wrap}
@@ -107,7 +103,6 @@ td:last-child{border-right:none}
 td.dn{font-family:var(--ff-mono);font-size:11px;color:var(--subtle)}
 td.awb-val{font-family:var(--ff-mono);font-size:11px;font-weight:500;color:var(--amber)}
 td.awb-empty{color:var(--border);font-size:18px;text-align:center;user-select:none}
-/* copy mode */
 body.copy-mode td:not(.awb-empty){cursor:pointer;transition:background .1s,color .1s}
 body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var(--amber)}
 .state{padding:60px 24px;text-align:center;color:var(--muted);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -160,18 +155,18 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
 
   <div class="filters">
     <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange()"><option>Caricamento...</option></select></div>
-    <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="updateLoadBtn()"><option value="">— Seleziona —</option></select></div>
+    <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
     <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listDestino"></datalist></div>
     <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listOdp"></datalist></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
-    <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dati dal file">↻ Aggiorna</button>
-    <button class="btn-download" id="btnDownload" onclick="downloadFiltered()" disabled title="Scarica Excel con i filtri attivi">⬇ Scarica Excel</button>
+    <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dal file">↻ Aggiorna</button>
+    <button class="btn-download" id="btnDownload" onclick="downloadFiltered()" disabled title="Scarica Excel filtrato">⬇ Scarica Excel</button>
     <label id="copyToggleLabel" class="copy-toggle">
       <input type="checkbox" id="copyToggle" onchange="toggleCopyMode(this.checked)">
       Click per copiare
     </label>
-    <div class="filter-info" id="fInfo">Seleziona filtri → Carica</div>
+    <div class="filter-info" id="fInfo">Seleziona data → Carica</div>
   </div>
 
   <div class="scroll-area">
@@ -180,9 +175,10 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
       <div class="stat"><div class="sl">Det. Carico</div><div class="sv" id="sCar">—</div></div>
       <div class="stat"><div class="sl">Righe ODP</div><div class="sv" id="sOdp">—</div></div>
       <div class="stat"><div class="sl">Con AWB</div><div class="sv amber" id="sAwb">—</div></div>
+      <div class="stat"><div class="sl">File mergiati</div><div class="sv" id="sFiles">—</div></div>
     </div>
     <div id="content">
-      <div class="state"><div class="state-ico">📦</div><div class="state-title">Nessun dato caricato</div><div>Seleziona data e plant, poi premi <strong>Carica Dati</strong></div></div>
+      <div class="state"><div class="state-ico">📦</div><div class="state-title">Nessun dato caricato</div><div>Seleziona una data e premi <strong>Carica Dati</strong></div></div>
     </div>
   </div>
 </div>
@@ -194,17 +190,17 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
 var CLIENT_ID   = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleusercontent.com';
 var FOLDER_ID   = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
 var SHEET_NAMES = ['Intestazione','Dettagli Carico','Dettagli ODP'];
-var TOKEN=null, currentData=null, currentDate=null, currentPlant=null, AWB_MAP={};
+var TOKEN=null, currentData=null, currentDate=null, AWB_MAP={};
+var currentFileIds={}; // mappa DocNum → fileId per il salvataggio AWB
 var copyModeOn=false, toastTimer=null;
 
 // ── INIT ──────────────────────────────────────
 window.onload=function(){
   var saved=getSavedSession();
   if(saved){
-    // Mostra subito l'app con i dati salvati — non aspetta il token
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appShell').style.display='flex';
-    setUserUI(saved.name, saved.email, saved.picture);
+    setUserUI(saved.name,saved.email,saved.picture);
   }
   waitGsi();
 };
@@ -217,38 +213,26 @@ function waitGsi(){
     scope:'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     callback:onToken
   });
-  // Silent refresh se sessione salvata — passa l'email come hint
-  // così Google salta il "Scegli account" e rinnova direttamente
   var saved=getSavedSession();
-  if(saved){
-    tokenClient.requestAccessToken({prompt:'', login_hint: saved.email||''});
-  }
+  if(saved) tokenClient.requestAccessToken({prompt:'',login_hint:saved.email||''});
 }
 
 function signIn(){ tokenClient.requestAccessToken({prompt:'select_account'}); }
-
 function signOut(){
   if(TOKEN) google.accounts.oauth2.revoke(TOKEN,function(){});
-  TOKEN=null; currentData=null;
-  clearSavedSession();
+  TOKEN=null; currentData=null; clearSavedSession();
   document.getElementById('appShell').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
 }
-
 function onToken(resp){
   if(resp.error){
-    // Silent refresh fallito: se non c'è sessione mostra login
-    if(!getSavedSession()){
-      document.getElementById('loginScreen').style.display='flex';
-      document.getElementById('appShell').style.display='none';
-    }
+    if(!getSavedSession()){ document.getElementById('loginScreen').style.display='flex'; document.getElementById('appShell').style.display='none'; }
     return;
   }
   TOKEN=resp.access_token;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
-  loadUserInfo();
-  loadDates();
+  loadUserInfo(); loadDates();
 }
 
 // ── SESSION ───────────────────────────────────
@@ -259,34 +243,24 @@ function clearSavedSession(){ try{localStorage.removeItem('wms_session');}catch(
 // ── USER ──────────────────────────────────────
 function loadUserInfo(){
   gFetch('https://www.googleapis.com/oauth2/v2/userinfo').then(function(u){
-    if(u.error) return;
-    saveSession(u.name||u.email||'', u.email||'', u.picture||'');
-    setUserUI(u.name||u.email||'—', u.email||'', u.picture||'');
+    if(u.error)return;
+    saveSession(u.name||u.email||'',u.email||'',u.picture||'');
+    setUserUI(u.name||u.email||'—',u.email||'',u.picture||'');
   }).catch(function(){});
 }
-
-function setUserUI(name, email, picture){
-  document.getElementById('userName').textContent = name||'—';
-  var wrap=document.getElementById('userAvatarWrap');
-  wrap.innerHTML='';
+function setUserUI(name,email,picture){
+  document.getElementById('userName').textContent=name||'—';
+  var wrap=document.getElementById('userAvatarWrap'); wrap.innerHTML='';
   if(picture){
     var img=document.createElement('img');
-    img.className='user-avatar';
-    img.referrerPolicy='no-referrer'; // fondamentale per foto Google
-    img.crossOrigin='anonymous';
-    img.src=picture;
-    img.alt=name;
+    img.className='user-avatar'; img.referrerPolicy='no-referrer'; img.src=picture; img.alt=name;
     img.onerror=function(){ wrap.innerHTML=makeInitial(email||name); };
     wrap.appendChild(img);
-  } else {
-    wrap.innerHTML=makeInitial(email||name);
-  }
+  } else { wrap.innerHTML=makeInitial(email||name); }
 }
-
 function makeInitial(str){
-  // Usa la prima lettera della parte locale della mail, o del nome
   var src=(str||'?').trim();
-  var ch = src.includes('@') ? src.split('@')[0].charAt(0) : src.charAt(0);
+  var ch=src.includes('@')?src.split('@')[0].charAt(0):src.charAt(0);
   return '<div class="user-avatar-fallback">'+ch.toUpperCase()+'</div>';
 }
 
@@ -296,217 +270,257 @@ function toggleCopyMode(on){
   document.body.classList.toggle('copy-mode',on);
   document.getElementById('copyToggleLabel').classList.toggle('active',on);
 }
-
 document.addEventListener('click',function(e){
-  if(!copyModeOn) return;
+  if(!copyModeOn)return;
   var td=e.target.closest('td');
-  if(!td||td.classList.contains('awb-empty')) return;
-  var val=td.textContent.trim();
-  if(!val) return;
+  if(!td||td.classList.contains('awb-empty'))return;
+  var val=td.textContent.trim(); if(!val)return;
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(val).then(function(){ showToast(val); }).catch(function(){ fallbackCopy(val); });
+    navigator.clipboard.writeText(val).then(function(){showToast(val);}).catch(function(){fallbackCopy(val);});
   } else { fallbackCopy(val); }
 });
-
 function fallbackCopy(val){
   var ta=document.createElement('textarea');
   ta.value=val; ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
   document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); }catch(e){}
-  document.body.removeChild(ta);
-  showToast(val);
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta); showToast(val);
 }
-
 function showToast(val){
   var t=document.getElementById('copyToast');
-  t.textContent='✓ Copiato: '+val;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(function(){ t.classList.remove('show'); },1600);
+  t.textContent='✓ Copiato: '+val; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove('show');},1600);
 }
 
-// ── DATE / PLANT ──────────────────────────────
+// ── DATE ──────────────────────────────────────
+// Estrae data YYYYMMDD dalla fine del nome file (prima di .xlsx)
+function extractDate(name){
+  var m=name.match(/(\d{8})\.xlsx$/i); return m?m[1]:null;
+}
+
 function loadDates(){
   var sel=document.getElementById('fDate');
   sel.innerHTML='<option>Caricamento...</option>';
-  listFiles('"'+FOLDER_ID+'" in parents and name contains "Spedizioni_Odierne_" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+  // Prende tutti gli xlsx nella cartella
+  listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
     var set={};
-    files.forEach(function(f){var m=f.name.match(/Spedizioni_Odierne_(\d{8})_/i);if(m)set[m[1]]=true;});
+    files.forEach(function(f){ var d=extractDate(f.name); if(d) set[d]=true; });
     var dates=Object.keys(set).sort().reverse();
     sel.innerHTML='';
-    dates.forEach(function(d){var o=document.createElement('option');o.value=d;o.text=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);sel.appendChild(o);});
-    if(dates.length>0){sel.selectedIndex=0;onDateChange();}
-    else sel.innerHTML='<option value="">Nessun file trovato</option>';
-  }).catch(function(){sel.innerHTML='<option>Errore</option>';});
+    if(!dates.length){ sel.innerHTML='<option value="">Nessun file trovato</option>'; return; }
+    dates.forEach(function(d){
+      var o=document.createElement('option');
+      o.value=d; o.text=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
+      sel.appendChild(o);
+    });
+    sel.selectedIndex=0;
+    document.getElementById('btnLoad').disabled=false;
+  }).catch(function(){ sel.innerHTML='<option>Errore</option>'; });
 }
 
 function onDateChange(){
-  var date=document.getElementById('fDate').value; if(!date)return;
-  var ps=document.getElementById('fPlant'); ps.innerHTML='<option>Caricamento...</option>';
-  listFiles('"'+FOLDER_ID+'" in parents and name contains "Spedizioni_Odierne_'+date+'_" and trashed=false')
-  .then(function(files){
-    var plants=[];
-    files.forEach(function(f){var m=f.name.match(/Spedizioni_Odierne_\d{8}_(.+)\.xlsx$/i);if(m&&plants.indexOf(m[1])===-1)plants.push(m[1]);});
-    plants.sort(); ps.innerHTML='';
-    plants.forEach(function(p){var o=document.createElement('option');o.value=p;o.text=p;ps.appendChild(o);});
-    if(plants.length===1)ps.selectedIndex=0;
-    updateLoadBtn();
-  }).catch(function(){ps.innerHTML='<option value="">Errore</option>';});
+  document.getElementById('btnLoad').disabled=!document.getElementById('fDate').value;
 }
 
-function updateLoadBtn(){
-  document.getElementById('btnLoad').disabled=!document.getElementById('fDate').value||!document.getElementById('fPlant').value;
+// ── CARICA DATI (merge di tutti i file della data) ────────────
+function loadData(){
+  var date=document.getElementById('fDate').value; if(!date)return;
+  var fPlant   =document.getElementById('fPlant').value.trim();
+  var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fDestino =document.getElementById('fDestino').value.trim();
+  var fOdp     =document.getElementById('fOdp').value.trim();
+  currentDate=date; AWB_MAP={}; currentData=null; currentFileIds={};
+  setContent(spinnerHtml('Ricerca file per '+date.substr(6,2)+'/'+date.substr(4,2)+'/'+date.substr(0,4)+'...',10));
+  document.getElementById('statsBar').style.display='none';
+  setAwbSt('','');
+
+  // Trova tutti i file con questa data alla fine del nome
+  listFiles('"'+FOLDER_ID+'" in parents and name contains "'+date+'" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+  .then(function(files){
+    // Filtra solo quelli che finiscono esattamente con _DATE.xlsx o DATE.xlsx
+    files=files.filter(function(f){ return extractDate(f.name)===date; });
+    if(!files.length) throw new Error('Nessun file trovato per la data '+date);
+    setContent(spinnerHtml('Download '+files.length+' file...',20));
+    // Scarica tutti in parallelo
+    return Promise.all(files.map(function(f){
+      return downloadFile(f.id).then(function(blob){
+        return {blob:blob, id:f.id, name:f.name};
+      });
+    }));
+  })
+  .then(function(results){
+    setContent(spinnerHtml('Merge '+results.length+' file...',60));
+    return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id,name:r.name}; }); }));
+  })
+  .then(function(parsed){
+    // Merge: unisci tutte le righe di ogni sheet, tieni le intestazioni dal primo file
+    var merged={};
+    SHEET_NAMES.forEach(function(sn){ merged[sn]={headers:[],rows:[]}; });
+    var headersSet=false;
+
+    parsed.forEach(function(p){
+      SHEET_NAMES.forEach(function(sn){
+        var sd=p.sheets[sn]||{headers:[],rows:[]};
+        if(!headersSet&&sd.headers.length){ merged[sn].headers=sd.headers; }
+        // Mappa DocNum → fileId per sapere su quale file scrivere l'AWB
+        if(sn==='Intestazione'){
+          sd.rows.forEach(function(r){ currentFileIds[norm(r[0])]=p.id; });
+        }
+        merged[sn].rows=merged[sn].rows.concat(sd.rows);
+      });
+      headersSet=true;
+    });
+
+    // Popola dropdown filtri con tutti i valori unici del merge
+    populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
+
+    // Applica filtri
+    var md=applyFilters(merged,fPlant,fCommessa,fDestino,fOdp);
+    if(md){
+      SHEET_NAMES.forEach(function(sn){
+        merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; });
+      });
+    }
+
+    currentData=merged;
+    document.getElementById('sFiles').textContent=parsed.length;
+    renderAll(merged);
+    document.getElementById('btnRefresh').disabled=false;
+    document.getElementById('btnDownload').disabled=false;
+  })
+  .catch(function(e){ setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>'); });
+}
+
+// Calcola il set di DocNum da tenere in base ai filtri
+function applyFilters(merged,fPlant,fCommessa,fDestino,fOdp){
+  var intRows=(merged['Intestazione']||{rows:[]}).rows;
+  var odpRows=(merged['Dettagli ODP']||{rows:[]}).rows;
+  var md=null;
+
+  // Plant = col F = indice 5
+  if(fPlant){
+    md=md||{};
+    intRows.forEach(function(r){
+      if(String(r[5]||'').trim()===fPlant) md[norm(r[0])]=true;
+    });
+  }
+  // Commessa = col H = indice 7
+  // Destino  = col I = indice 8
+  if(fCommessa||fDestino){
+    var mdCD={};
+    intRows.forEach(function(r){
+      var c=String(r[7]||'').trim(), d=String(r[8]||'').trim();
+      if((!fCommessa||c===fCommessa)&&(!fDestino||d===fDestino)) mdCD[norm(r[0])]=true;
+    });
+    if(md){ Object.keys(md).forEach(function(k){if(!mdCD[k])delete md[k];}); }
+    else md=mdCD;
+  }
+  // ODP = col C = indice 2 di Dettagli ODP
+  if(fOdp){
+    var mdOdp={};
+    odpRows.forEach(function(r){ if(String(r[2]||'').trim()===fOdp) mdOdp[norm(r[0])]=true; });
+    if(md){ Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];}); }
+    else md=mdOdp;
+  }
+  return md;
+}
+
+// ── AGGIORNA ──────────────────────────────────
+function refreshData(){
+  if(!currentDate)return;
+  var btn=document.getElementById('btnRefresh');
+  btn.classList.add('spin'); btn.disabled=true;
+  var fPlant   =document.getElementById('fPlant').value.trim();
+  var fCommessa=document.getElementById('fCommessa').value.trim();
+  var fDestino =document.getElementById('fDestino').value.trim();
+  var fOdp     =document.getElementById('fOdp').value.trim();
+
+  listFiles('"'+FOLDER_ID+'" in parents and name contains "'+currentDate+'" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+  .then(function(files){
+    files=files.filter(function(f){ return extractDate(f.name)===currentDate; });
+    if(!files.length) throw new Error('Nessun file trovato');
+    return Promise.all(files.map(function(f){
+      return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; });
+    }));
+  })
+  .then(function(results){
+    return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id}; }); }));
+  })
+  .then(function(parsed){
+    var merged={};
+    SHEET_NAMES.forEach(function(sn){ merged[sn]={headers:[],rows:[]}; });
+    var headersSet=false;
+    currentFileIds={};
+    parsed.forEach(function(p){
+      SHEET_NAMES.forEach(function(sn){
+        var sd=p.sheets[sn]||{headers:[],rows:[]};
+        if(!headersSet&&sd.headers.length) merged[sn].headers=sd.headers;
+        if(sn==='Intestazione') sd.rows.forEach(function(r){ currentFileIds[norm(r[0])]=p.id; });
+        merged[sn].rows=merged[sn].rows.concat(sd.rows);
+      });
+      headersSet=true;
+    });
+    populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
+    var md=applyFilters(merged,fPlant,fCommessa,fDestino,fOdp);
+    if(md){ SHEET_NAMES.forEach(function(sn){ merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; }); }); }
+    currentData=merged;
+    document.getElementById('sFiles').textContent=parsed.length;
+    renderAll(merged);
+    btn.classList.remove('spin'); btn.disabled=false;
+    showToast('✓ Dati aggiornati');
+  })
+  .catch(function(){ btn.classList.remove('spin'); btn.disabled=false; showToast('✗ Errore aggiornamento'); });
 }
 
 // ── FILTRI DINAMICI ───────────────────────────
 function populateFilters(intRows,odpRows){
-  var commesse={},destini={},odps={};
+  var plants={},commesse={},destini={},odps={};
   intRows.forEach(function(r){
-    var c=String(r[7]||'').trim(),d=String(r[8]||'').trim();
-    if(c)commesse[c]=true; if(d)destini[d]=true;
+    var p=String(r[5]||'').trim(); // col F
+    var c=String(r[7]||'').trim(); // col H
+    var d=String(r[8]||'').trim(); // col I
+    if(p)plants[p]=true; if(c)commesse[c]=true; if(d)destini[d]=true;
   });
   odpRows.forEach(function(r){ var o=String(r[2]||'').trim(); if(o)odps[o]=true; });
+  fillSelect('fPlant',plants,'— Tutti —');
   fillSelect('fCommessa',commesse,'— Tutte —');
   fillDatalist('listDestino',destini);
   fillDatalist('listOdp',odps);
 }
-
 function fillSelect(id,obj,placeholder){
   var sel=document.getElementById(id),prev=sel.value;
   sel.innerHTML='<option value="">'+placeholder+'</option>';
   Object.keys(obj).sort().forEach(function(v){
-    var o=document.createElement('option');
-    o.value=v;o.text=v;if(v===prev)o.selected=true;sel.appendChild(o);
+    var o=document.createElement('option'); o.value=v; o.text=v;
+    if(v===prev)o.selected=true; sel.appendChild(o);
   });
 }
-
 function fillDatalist(id,obj){
-  var dl=document.getElementById(id);
-  if(!dl)return;
+  var dl=document.getElementById(id); if(!dl)return;
   dl.innerHTML='';
-  Object.keys(obj).sort().forEach(function(v){
-    var o=document.createElement('option');
-    o.value=v; dl.appendChild(o);
-  });
-}
-
-// ── CARICA DATI ───────────────────────────────
-function loadData(){
-  var date=document.getElementById('fDate').value;
-  var plant=document.getElementById('fPlant').value;
-  var fCommessa=document.getElementById('fCommessa').value.trim();
-  var fDestino=document.getElementById('fDestino').value.trim();
-  var fOdp=document.getElementById('fOdp').value.trim();
-  if(!date||!plant)return;
-  currentDate=date;currentPlant=plant;AWB_MAP={};currentData=null;
-  setContent(spinnerHtml('Ricerca file...',10));
-  document.getElementById('statsBar').style.display='none';
-  setAwbSt('','');
-  var fn='Spedizioni_Odierne_'+date+'_'+plant+'.xlsx';
-  listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
-  .then(function(files){
-    if(!files.length)throw new Error('File non trovato: '+fn);
-    setContent(spinnerHtml('Download file...',30));
-    return downloadFile(files[0].id);
-  })
-  .then(function(blob){setContent(spinnerHtml('Lettura dati...',65));return parseXlsx(blob);})
-  .then(function(sheets){
-    var intRows=(sheets['Intestazione']||{rows:[]}).rows;
-    var odpRows=(sheets['Dettagli ODP']||{rows:[]}).rows;
-    populateFilters(intRows,odpRows);
-    var md=null;
-    if(fCommessa||fDestino){
-      md={};
-      intRows.forEach(function(r){
-        var c=String(r[7]||'').trim(),d=String(r[8]||'').trim();
-        if((!fCommessa||c===fCommessa)&&(!fDestino||d===fDestino))md[norm(r[0])]=true;
-      });
-    }
-    if(fOdp){
-      var mdOdp={};
-      odpRows.forEach(function(r){if(String(r[2]||'').trim()===fOdp)mdOdp[norm(r[0])]=true;});
-      if(md){Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];});}
-      else md=mdOdp;
-    }
-    if(md){
-      SHEET_NAMES.forEach(function(sn){
-        if(sheets[sn])sheets[sn].rows=sheets[sn].rows.filter(function(r){return md[norm(r[0])];});
-      });
-    }
-    currentData=sheets;renderAll(sheets);
-    document.getElementById('btnRefresh').disabled=false;
-    document.getElementById('btnDownload').disabled=false;
-  })
-  .catch(function(e){setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>');});
-}
-
-// ── AGGIORNA (ricarica senza resettare filtri) ─
-function refreshData(){
-  if(!currentDate||!currentPlant)return;
-  var btn=document.getElementById('btnRefresh');
-  btn.classList.add('spin'); btn.disabled=true;
-  var fCommessa=document.getElementById('fCommessa').value.trim();
-  var fDestino=document.getElementById('fDestino').value.trim();
-  var fOdp=document.getElementById('fOdp').value.trim();
-  var fn='Spedizioni_Odierne_'+currentDate+'_'+currentPlant+'.xlsx';
-  listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
-  .then(function(files){
-    if(!files.length)throw new Error('File non trovato');
-    return downloadFile(files[0].id);
-  })
-  .then(function(blob){return parseXlsx(blob);})
-  .then(function(sheets){
-    var intRows=(sheets['Intestazione']||{rows:[]}).rows;
-    var odpRows=(sheets['Dettagli ODP']||{rows:[]}).rows;
-    populateFilters(intRows,odpRows);
-    var md=null;
-    if(fCommessa||fDestino){
-      md={};
-      intRows.forEach(function(r){
-        var c=String(r[7]||'').trim(),d=String(r[8]||'').trim();
-        if((!fCommessa||c===fCommessa)&&(!fDestino||d===fDestino))md[norm(r[0])]=true;
-      });
-    }
-    if(fOdp){
-      var mdOdp={};
-      odpRows.forEach(function(r){if(String(r[2]||'').trim()===fOdp)mdOdp[norm(r[0])]=true;});
-      if(md){Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];});}
-      else md=mdOdp;
-    }
-    if(md){
-      SHEET_NAMES.forEach(function(sn){
-        if(sheets[sn])sheets[sn].rows=sheets[sn].rows.filter(function(r){return md[norm(r[0])];});
-      });
-    }
-    currentData=sheets; renderAll(sheets);
-    btn.classList.remove('spin'); btn.disabled=false;
-    showToast('✓ Dati aggiornati');
-  })
-  .catch(function(e){
-    btn.classList.remove('spin'); btn.disabled=false;
-    showToast('✗ Errore aggiornamento');
-  });
+  Object.keys(obj).sort().forEach(function(v){ var o=document.createElement('option'); o.value=v; dl.appendChild(o); });
 }
 
 // ── DOWNLOAD EXCEL FILTRATO ───────────────────
 function downloadFiltered(){
-  if(!currentData) return;
-  var wb = XLSX.utils.book_new();
+  if(!currentData)return;
+  var wb=XLSX.utils.book_new();
   SHEET_NAMES.forEach(function(sn){
-    var sd = currentData[sn]||{headers:[],rows:[]};
-    var wsData = [];
-    if(sd.headers[0]) wsData.push(sd.headers[0]);
-    if(sd.headers[1]) wsData.push(sd.headers[1]);
-    sd.rows.forEach(function(r){ wsData.push(r); });
-    var ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, sn);
+    var sd=currentData[sn]||{headers:[],rows:[]};
+    var wsData=[];
+    if(sd.headers[0])wsData.push(sd.headers[0]);
+    if(sd.headers[1])wsData.push(sd.headers[1]);
+    sd.rows.forEach(function(r){wsData.push(r);});
+    var ws=XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb,ws,sn);
   });
-  var d = currentDate||'';
-  var fname = 'Spedizioni_'+currentPlant+'_'+d.substr(6,2)+d.substr(4,2)+d.substr(0,4)+'.xlsx';
-  XLSX.writeFile(wb, fname);
+  var d=currentDate||'';
+  var fname='Spedizioni_'+d.substr(6,2)+d.substr(4,2)+d.substr(0,4)+'.xlsx';
+  XLSX.writeFile(wb,fname);
 }
 
+// ── PARSE XLSX ────────────────────────────────
 function parseXlsx(blob){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
@@ -525,7 +539,7 @@ function parseXlsx(blob){
         resolve(out);
       }catch(err){reject(err);}
     };
-    reader.onerror=reject;reader.readAsArrayBuffer(blob);
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
 
@@ -541,7 +555,7 @@ function renderAll(sheets){
   document.getElementById('sAwb').textContent=awbCnt+' / '+int.rows.length;
   document.getElementById('statsBar').style.display='flex';
   var d=currentDate;
-  document.getElementById('fInfo').textContent=currentPlant+' · '+d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4)+' · '+int.rows.length+' spedizioni';
+  document.getElementById('fInfo').textContent=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4)+' · '+int.rows.length+' spedizioni';
   var h='<div class="tabs">';
   h+=tabBtn('ti','Intestazione',int.rows.length,true);
   h+=tabBtn('tc','Dettagli Carico',car.rows.length,false);
@@ -568,7 +582,7 @@ function renderTable(sd,isInt){
   if(hdr[1]){h+='<tr>';for(var c=0;c<nc;c++)h+='<th>'+esc(hdr[1][c]||'')+'</th>';h+='</tr>';}
   h+='</thead><tbody>';
   rows.forEach(function(row){
-    var dn=norm(row[0]);h+='<tr>';
+    var dn=norm(row[0]); h+='<tr>';
     for(var c=0;c<nc;c++){
       var v=row[c]!==undefined?row[c]:'';
       if(c===0)h+='<td class="dn">'+esc(String(v))+'</td>';
@@ -577,10 +591,11 @@ function renderTable(sd,isInt){
     }
     h+='</tr>';
   });
-  h+='</tbody></table></div>';return h;
+  h+='</tbody></table></div>'; return h;
 }
 
 // ── AWB ───────────────────────────────────────
+// Il salvataggio scrive sull'file originale corretto per ogni DocNum
 function applyAwb(){
   var awb=document.getElementById('awbInput').value.trim();
   if(!awb){setAwbSt('err','⚠ Inserisci un codice AWB');return;}
@@ -588,30 +603,46 @@ function applyAwb(){
   var docs=(currentData['Intestazione']||{rows:[]}).rows.map(function(r){return norm(r[0]);}).filter(Boolean);
   if(!docs.length){setAwbSt('err','⚠ Nessuna riga filtrata');return;}
   document.getElementById('btnAwb').disabled=true;
-  setAwbSt('loading','⏳ Download file...');
-  var fn='Spedizioni_Odierne_'+currentDate+'_'+currentPlant+'.xlsx';
-  listFiles('"'+FOLDER_ID+'" in parents and name="'+fn+'" and trashed=false')
-  .then(function(files){
-    if(!files.length)throw new Error('File non trovato: '+fn);
-    setAwbSt('loading','⏳ Modifica AWB...');
-    return downloadFile(files[0].id).then(function(blob){return{blob:blob,fid:files[0].id};});
-  })
-  .then(function(o){return modifyAwb(o.blob,docs,awb).then(function(nb){return{nb:nb,fid:o.fid};});})
-  .then(function(o){setAwbSt('loading','⏳ Salvataggio...');return uploadFile(o.fid,o.nb,fn);})
+  setAwbSt('loading','⏳ Salvataggio AWB su '+Object.keys(groupByFile(docs)).length+' file...');
+
+  // Raggruppa i DocNum per file di origine
+  var groups=groupByFile(docs);
+  var fileIds=Object.keys(groups);
+
+  // Aggiorna ogni file in parallelo
+  Promise.all(fileIds.map(function(fid){
+    return downloadFile(fid).then(function(blob){
+      return modifyAwb(blob,groups[fid],awb).then(function(nb){
+        return uploadFile(fid,nb,'');
+      });
+    });
+  }))
   .then(function(){
     docs.forEach(function(dn){AWB_MAP[dn]=awb;});
     document.querySelectorAll('tbody tr').forEach(function(tr){
-      var dc=tr.querySelector('td.dn');if(!dc)return;
+      var dc=tr.querySelector('td.dn'); if(!dc)return;
       var dn=norm(dc.textContent);
       if(AWB_MAP[dn]){var tds=tr.querySelectorAll('td');if(tds[3]){tds[3].className='awb-val';tds[3].textContent=AWB_MAP[dn];}}
     });
     var int2=currentData['Intestazione']||{rows:[]};
     document.getElementById('sAwb').textContent=int2.rows.filter(function(r){return AWB_MAP[norm(r[0])];}).length+' / '+int2.rows.length;
-    setAwbSt('ok','✓ AWB "'+awb+'" applicato a '+docs.length+' righe');
+    setAwbSt('ok','✓ AWB "'+awb+'" applicato a '+docs.length+' righe su '+fileIds.length+' file');
     document.getElementById('awbInput').value='';
     document.getElementById('btnAwb').disabled=false;
   })
   .catch(function(e){setAwbSt('err','✗ '+e.message);document.getElementById('btnAwb').disabled=false;});
+}
+
+// Raggruppa array di DocNum per fileId di origine
+function groupByFile(docNums){
+  var groups={};
+  docNums.forEach(function(dn){
+    var fid=currentFileIds[dn];
+    if(!fid)return;
+    if(!groups[fid])groups[fid]=[];
+    groups[fid].push(dn);
+  });
+  return groups;
 }
 
 function modifyAwb(blob,docNums,awbValue){
@@ -633,7 +664,7 @@ function modifyAwb(blob,docNums,awbValue){
         resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       }catch(err){reject(err);}
     };
-    reader.onerror=reject;reader.readAsArrayBuffer(blob);
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
 
@@ -641,7 +672,7 @@ function modifyAwb(blob,docNums,awbValue){
 function listFiles(q){return gFetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name)&pageSize=200').then(function(r){return r.files||[];});}
 function downloadFile(id){return fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){if(!r.ok)throw new Error('Download fallito: '+r.status);return r.blob();});}
 function uploadFile(fileId,blob,name){
-  var boundary='sped_'+Date.now(),meta=JSON.stringify({name:name}),enc=new TextEncoder();
+  var boundary='sped_'+Date.now(),meta=JSON.stringify(name?{name:name}:{}),enc=new TextEncoder();
   var pre='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+boundary+'\r\nContent-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\r\n\r\n';
   var post='\r\n--'+boundary+'--';
   return blob.arrayBuffer().then(function(buf){
