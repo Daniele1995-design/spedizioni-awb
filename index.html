@@ -208,9 +208,11 @@ function waitGsi(){
     scope:'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     callback:onToken
   });
-  // Silent refresh se sessione salvata
-  if(getSavedSession()){
-    tokenClient.requestAccessToken({prompt:''});
+  // Silent refresh se sessione salvata — passa l'email come hint
+  // così Google salta il "Scegli account" e rinnova direttamente
+  var saved=getSavedSession();
+  if(saved){
+    tokenClient.requestAccessToken({prompt:'', login_hint: saved.email||''});
   }
 }
 
