@@ -147,7 +147,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="awb-panel">
     <div class="awb-label"><div class="awb-dot"></div>Inserisci AWB</div>
     <div class="awb-wrap">
-      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare alle righe" maxlength="60">
+      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare a tutte le righe filtrate" maxlength="60">
       <button class="btn-awb" id="btnAwb" onclick="applyAwb()">Applica AWB</button>
     </div>
     <div id="awbStatus" class="awb-status"></div>
@@ -630,7 +630,8 @@ function applyAwb(){
   }))
   .then(function(){
     docs.forEach(function(dn){AWB_MAP[dn]=awb;});
-    document.querySelectorAll('tbody tr').forEach(function(tr){
+    // Aggiorna visivamente SOLO le righe della tab Intestazione (panel #ti)
+    document.querySelectorAll('#ti tbody tr').forEach(function(tr){
       var dc=tr.querySelector('td.dn'); if(!dc)return;
       var dn=norm(dc.textContent);
       if(AWB_MAP[dn]){var tds=tr.querySelectorAll('td');if(tds[3]){tds[3].className='awb-val';tds[3].textContent=AWB_MAP[dn];}}
