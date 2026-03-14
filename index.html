@@ -147,7 +147,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="awb-panel">
     <div class="awb-label"><div class="awb-dot"></div>Inserisci AWB</div>
     <div class="awb-wrap">
-      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare a tutte le righe filtrate" maxlength="60">
+      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare alle righe" maxlength="60">
       <button class="btn-awb" id="btnAwb" onclick="applyAwb()">Applica AWB</button>
     </div>
     <div id="awbStatus" class="awb-status"></div>
@@ -516,7 +516,7 @@ function downloadFiltered(){
     XLSX.utils.book_append_sheet(wb,ws,sn);
   });
   var d=currentDate||'';
-  var parts=['Spedizioni',d.substr(6,2)+d.substr(4,2)+d.substr(0,4)];
+  var parts=['Spedizioni',d.substr(4,2)+d.substr(0,4)+d.substr(6,2)];
   var fPlant   =document.getElementById('fPlant').value.trim();
   var fCommessa=document.getElementById('fCommessa').value.trim();
   var fDestino =document.getElementById('fDestino').value.trim();
