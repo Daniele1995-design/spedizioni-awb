@@ -155,8 +155,8 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange()"><option>Caricamento...</option></select></div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="updateLoadBtn()"><option value="">— Seleziona —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc"><option value="">— Tutte —</option></select></div>
-    <div class="fg"><div class="fl">Destino</div><select id="fDestino" class="fc"><option value="">— Tutti —</option></select></div>
-    <div class="fg"><div class="fl">Numero ODP</div><select id="fOdp" class="fc"><option value="">— Tutti —</option></select></div>
+    <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px"><datalist id="listDestino"></datalist></div>
+    <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px"><datalist id="listOdp"></datalist></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <label id="copyToggleLabel" class="copy-toggle">
       <input type="checkbox" id="copyToggle" onchange="toggleCopyMode(this.checked)">
@@ -357,8 +357,8 @@ function populateFilters(intRows,odpRows){
   });
   odpRows.forEach(function(r){ var o=String(r[2]||'').trim(); if(o)odps[o]=true; });
   fillSelect('fCommessa',commesse,'— Tutte —');
-  fillSelect('fDestino',destini,'— Tutti —');
-  fillSelect('fOdp',odps,'— Tutti —');
+  fillDatalist('listDestino',destini);
+  fillDatalist('listOdp',odps);
 }
 
 function fillSelect(id,obj,placeholder){
@@ -367,6 +367,16 @@ function fillSelect(id,obj,placeholder){
   Object.keys(obj).sort().forEach(function(v){
     var o=document.createElement('option');
     o.value=v;o.text=v;if(v===prev)o.selected=true;sel.appendChild(o);
+  });
+}
+
+function fillDatalist(id,obj){
+  var dl=document.getElementById(id);
+  if(!dl)return;
+  dl.innerHTML='';
+  Object.keys(obj).sort().forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v; dl.appendChild(o);
   });
 }
 
