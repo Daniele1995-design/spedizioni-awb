@@ -531,6 +531,13 @@ function loadData(){
       headersSet=true;
     });
 
+    // Ordina per DocNum (col A) — ordine stabile indipendente dall'ordine dei file Drive
+    SHEET_NAMES.forEach(function(sn){
+      merged[sn].rows.sort(function(a,b){
+        return String(a[0]||'').localeCompare(String(b[0]||''),undefined,{numeric:true});
+      });
+    });
+
     // Popola dropdown filtri con tutti i valori unici del merge
     populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
 
@@ -620,6 +627,12 @@ function refreshData(){
         merged[sn].rows=merged[sn].rows.concat(sd.rows);
       });
       headersSet=true;
+    });
+    // Ordina per DocNum — ordine stabile
+    SHEET_NAMES.forEach(function(sn){
+      merged[sn].rows.sort(function(a,b){
+        return String(a[0]||'').localeCompare(String(b[0]||''),undefined,{numeric:true});
+      });
     });
     populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
     var md=applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fAwb,fOdp);
