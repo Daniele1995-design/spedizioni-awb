@@ -40,6 +40,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--ff-sans);font-size
 .user-avatar-fallback{width:24px;height:24px;border-radius:50%;background:var(--amber-dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--ff-cond);font-size:11px;font-weight:700;color:var(--amber)}
 .btn-logout{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--ff-sans);transition:all .2s}
 .btn-logout:hover{color:var(--red);border-color:var(--red)}
+/* ADMIN MODE */
+.btn-admin{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--ff-cond);font-weight:700;letter-spacing:1px;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-admin:hover{border-color:var(--blue);color:var(--blue)}
+.btn-admin.on{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08)}
+.btn-admin .adot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .2s}
+.btn-admin.on .adot{background:var(--red);animation:pulse 1.5s infinite}
+/* ADMIN MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.hide{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;width:320px;display:flex;flex-direction:column;gap:16px}
+.modal-title{font-family:var(--ff-cond);font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px}
+.modal-sub{font-size:12px;color:var(--muted);margin-top:-8px}
+.modal-input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--ff-mono);font-size:14px;color:var(--text);outline:none;width:100%;transition:border-color .2s}
+.modal-input:focus{border-color:var(--blue)}
+.modal-err{font-size:11px;color:var(--red);display:none}
+.modal-err.show{display:block}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end}
+.modal-btn{border:none;border-radius:6px;padding:8px 20px;font-family:var(--ff-cond);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.modal-btn.ok{background:var(--blue);color:#fff}
+.modal-btn.ok:hover{background:#2563eb}
+.modal-btn.cancel{background:var(--card);color:var(--muted);border:1px solid var(--border)}
+.modal-btn.cancel:hover{color:var(--text)}
+/* EDITABLE CELLS in admin mode */
+body.admin-mode td.editable{cursor:cell;position:relative}
+body.admin-mode td.editable:hover{background:rgba(59,130,246,.08);outline:1px solid var(--blue)}
+td.editing{padding:0!important}
+td.editing input{width:100%;height:100%;min-height:32px;background:var(--card);border:2px solid var(--blue);border-radius:0;padding:6px 10px;font-family:var(--ff-mono);font-size:12px;color:var(--text);outline:none;box-sizing:border-box}
 .awb-panel{background:linear-gradient(135deg,#160f00 0%,#1a1500 50%,#0d1117 100%);border-bottom:2px solid var(--amber-dim);padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;flex-shrink:0}
 .awb-label{font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);flex-shrink:0;display:flex;align-items:center;gap:8px}
 .awb-dot{width:8px;height:8px;background:var(--amber);border-radius:50%;animation:pulse 2s infinite}
@@ -140,6 +167,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
         <div id="userAvatarWrap"></div>
         <span id="userName">—</span>
       </div>
+      <button class="btn-admin" id="btnAdmin" onclick="toggleAdmin()"><span class="adot"></span>Admin</button>
       <button class="btn-logout" onclick="signOut()">Esci</button>
     </div>
   </header>
@@ -181,6 +209,19 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     </div>
     <div id="content">
       <div class="state"><div class="state-ico">📦</div><div class="state-title">Nessun dato caricato</div><div>Seleziona una data e premi <strong>Carica Dati</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="adminModal" class="modal-overlay hide">
+  <div class="modal">
+    <div class="modal-title">🔐 Modalità Admin</div>
+    <div class="modal-sub">Inserisci la password per abilitare la modifica delle celle</div>
+    <input class="modal-input" id="adminPwInput" type="password" placeholder="Password..." onkeydown="if(event.key==='Enter')confirmAdmin()">
+    <div class="modal-err" id="adminErr">Password errata. Riprova.</div>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeAdminModal()">Annulla</button>
+      <button class="modal-btn ok" onclick="confirmAdmin()">Accedi</button>
     </div>
   </div>
 </div>
@@ -264,6 +305,126 @@ function makeInitial(str){
   var src=(str||'?').trim();
   var ch=src.includes('@')?src.split('@')[0].charAt(0):src.charAt(0);
   return '<div class="user-avatar-fallback">'+ch.toUpperCase()+'</div>';
+}
+
+var ADMIN_PASS='Ats2026@';
+var adminMode=false;
+
+function toggleAdmin(){
+  if(adminMode){ disableAdmin(); return; }
+  // Mostra modal password
+  document.getElementById('adminModal').classList.remove('hide');
+  document.getElementById('adminPwInput').value='';
+  document.getElementById('adminErr').classList.remove('show');
+  setTimeout(function(){ document.getElementById('adminPwInput').focus(); },100);
+}
+
+function closeAdminModal(){
+  document.getElementById('adminModal').classList.add('hide');
+}
+
+function confirmAdmin(){
+  var pw=document.getElementById('adminPwInput').value;
+  if(pw===ADMIN_PASS){
+    adminMode=true;
+    closeAdminModal();
+    document.getElementById('btnAdmin').classList.add('on');
+    document.body.classList.add('admin-mode');
+    showToast('🔓 Modalità Admin attiva');
+    // Re-render per aggiungere classe editable alle celle
+    if(currentData) renderAll(currentData);
+  } else {
+    document.getElementById('adminErr').classList.add('show');
+    document.getElementById('adminPwInput').value='';
+    document.getElementById('adminPwInput').focus();
+  }
+}
+
+function disableAdmin(){
+  adminMode=false;
+  document.getElementById('btnAdmin').classList.remove('on');
+  document.body.classList.remove('admin-mode');
+  showToast('🔒 Modalità Admin disattivata');
+  if(currentData) renderAll(currentData);
+}
+
+// Chiudi modal cliccando overlay
+document.addEventListener('click',function(e){
+  if(e.target.id==='adminModal') closeAdminModal();
+});
+
+// ── EDIT CELLA ADMIN ──────────────────────────
+// sheetName: nome sheet, rowIdx: indice riga in currentData, colIdx: indice colonna
+function startCellEdit(td, sheetName, rowIdx, colIdx){
+  if(!adminMode) return;
+  if(td.classList.contains('editing')) return;
+  var currentVal=currentData[sheetName].rows[rowIdx][colIdx];
+  td.classList.add('editing');
+  var inp=document.createElement('input');
+  inp.value=currentVal===null||currentVal===undefined?'':String(currentVal);
+  td.innerHTML=''; td.appendChild(inp);
+  inp.focus(); inp.select();
+
+  function save(){
+    var newVal=inp.value.trim();
+    var oldVal=String(currentVal||'').trim();
+    td.classList.remove('editing');
+    td.textContent=newVal;
+    if(newVal===oldVal) return; // nessuna modifica
+    // Aggiorna dati in memoria
+    currentData[sheetName].rows[rowIdx][colIdx]=newVal;
+    // Salva su Drive
+    saveCellToDrive(sheetName, rowIdx, colIdx, newVal);
+  }
+
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', function(e){
+    if(e.key==='Enter'){ e.preventDefault(); inp.blur(); }
+    if(e.key==='Escape'){ inp.removeEventListener('blur',save); td.classList.remove('editing'); td.textContent=currentVal||''; }
+  });
+}
+
+function saveCellToDrive(sheetName, rowIdx, colIdx, newVal){
+  // Trova il DocNum della riga per sapere su quale file scrivere
+  var docNum=norm(currentData[sheetName].rows[rowIdx][0]);
+  var fileId=currentFileIds[docNum];
+  if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
+
+  setAwbSt('loading','⏳ Salvataggio cella...');
+  downloadFile(fileId)
+  .then(function(blob){ return modifyCellInBlob(blob, sheetName, docNum, colIdx, newVal); })
+  .then(function(nb){ return uploadFile(fileId, nb, ''); })
+  .then(function(){
+    setAwbSt('ok','✓ Cella salvata');
+    setTimeout(function(){ setAwbSt('',''); }, 2000);
+  })
+  .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+}
+
+function modifyCellInBlob(blob, sheetName, docNum, colIdx, newVal){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+        var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sheetName.trim().toLowerCase();});
+        if(!rn) throw new Error('Sheet '+sheetName+' non trovato');
+        var ws=wb.Sheets[rn];
+        var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+        for(var r=2;r<=range.e.r;r++){
+          var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
+          if(ca&&norm(ca.v)===docNum){
+            var cellAddr=XLSX.utils.encode_cell({r:r,c:colIdx});
+            ws[cellAddr]=newVal===''?{t:'z',v:''}:{t:'s',v:newVal};
+            break;
+          }
+        }
+        var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+        resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      }catch(err){reject(err);}
+    };
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
+  });
 }
 
 // ── COPY MODE ─────────────────────────────────
@@ -581,9 +742,9 @@ function renderAll(sheets){
   h+=tabBtn('tc','Dettagli Carico',car.rows.length,false);
   h+=tabBtn('to','Dettagli ODP',odp.rows.length,false);
   h+='</div>';
-  h+='<div id="ti" class="tab-panel on">'+renderTable(int,true)+'</div>';
-  h+='<div id="tc" class="tab-panel">'+renderTable(car,false)+'</div>';
-  h+='<div id="to" class="tab-panel">'+renderTable(odp,false)+'</div>';
+  h+='<div id="ti" class="tab-panel on">'+renderTable(int,true,'Intestazione')+'</div>';
+  h+='<div id="tc" class="tab-panel">'+renderTable(car,false,'Dettagli Carico')+'</div>';
+  h+='<div id="to" class="tab-panel">'+renderTable(odp,false,'Dettagli ODP')+'</div>';
   setContent(h);
 }
 function tabBtn(id,label,cnt,on){return '<button class="tab'+(on?' on':'')+'" onclick="switchTab(\''+id+'\')">'+label+'<span class="tcnt">'+cnt+'</span></button>';}
@@ -593,7 +754,7 @@ function switchTab(id){
   document.getElementById(id).classList.add('on');
   document.querySelectorAll('.tab')[{ti:0,tc:1,to:2}[id]].classList.add('on');
 }
-function renderTable(sd,isInt){
+function renderTable(sd,isInt,sheetName){
   var hdr=sd.headers||[],rows=sd.rows||[];
   if(!rows.length)return '<div class="state"><div class="state-ico">🔍</div><div class="state-title">Nessun dato</div><div>Nessuna riga trovata con i filtri selezionati.</div></div>';
   var nc=Math.max(hdr.length>0?hdr[0].length:0,rows.length>0?rows[0].length:0);
@@ -601,13 +762,23 @@ function renderTable(sd,isInt){
   if(hdr[0]){h+='<tr>';for(var c=0;c<nc;c++)h+='<th>'+esc(hdr[0][c]||'')+'</th>';h+='</tr>';}
   if(hdr[1]){h+='<tr>';for(var c=0;c<nc;c++)h+='<th>'+esc(hdr[1][c]||'')+'</th>';h+='</tr>';}
   h+='</thead><tbody>';
-  rows.forEach(function(row){
+  rows.forEach(function(row,ri){
     var dn=norm(row[0]); h+='<tr>';
     for(var c=0;c<nc;c++){
       var v=row[c]!==undefined?row[c]:'';
-      if(c===0)h+='<td class="dn">'+esc(String(v))+'</td>';
-      else if(isInt&&c===3){var awb=AWB_MAP[dn]||String(v||'');h+=awb?'<td class="awb-val">'+esc(awb)+'</td>':'<td class="awb-empty">·</td>';}
-      else h+='<td>'+esc(String(v===null||v===undefined?'':v))+'</td>';
+      var isAwbCol=isInt&&c===3;
+      var isDocNum=c===0;
+      // In admin mode tutte le celle tranne DocNum e AWB-col sono editabili
+      var editable=adminMode&&!isDocNum&&!isAwbCol;
+      var editAttr=editable?' class="editable" onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'';
+      if(isDocNum){
+        h+='<td class="dn">'+esc(String(v))+'</td>';
+      } else if(isAwbCol){
+        var awb=AWB_MAP[dn]||String(v||'');
+        h+=awb?'<td class="awb-val">'+esc(awb)+'</td>':'<td class="awb-empty">·</td>';
+      } else {
+        h+='<td'+editAttr+'>'+esc(String(v===null||v===undefined?'':v))+'</td>';
+      }
     }
     h+='</tr>';
   });
