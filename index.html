@@ -768,14 +768,14 @@ function renderTable(sd,isInt,sheetName){
       var v=row[c]!==undefined?row[c]:'';
       var isAwbCol=isInt&&c===3;
       var isDocNum=c===0;
-      // In admin mode tutte le celle tranne DocNum e AWB-col sono editabili
-      var editable=adminMode&&!isDocNum&&!isAwbCol;
+      // In admin mode tutte le celle tranne DocNum sono editabili
+      var editable=adminMode&&!isDocNum;
       var editAttr=editable?' class="editable" onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'';
       if(isDocNum){
         h+='<td class="dn">'+esc(String(v))+'</td>';
       } else if(isAwbCol){
         var awb=AWB_MAP[dn]||String(v||'');
-        h+=awb?'<td class="awb-val">'+esc(awb)+'</td>':'<td class="awb-empty">·</td>';
+        h+=awb?'<td class="awb-val'+( editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>'+esc(awb)+'</td>':'<td class="awb-empty'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>·</td>';
       } else {
         h+='<td'+editAttr+'>'+esc(String(v===null||v===undefined?'':v))+'</td>';
       }
