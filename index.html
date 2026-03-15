@@ -359,40 +359,40 @@ function startCellEdit(td, sheetName, rowIdx, colIdx){
   if(!adminMode) return;
   if(td.classList.contains('editing')) return;
   var currentVal=currentData[sheetName].rows[rowIdx][colIdx];
+  var currentStr=currentVal===null||currentVal===undefined?'':String(currentVal);
   td.classList.add('editing');
   var inp=document.createElement('input');
-  inp.value=currentVal===null||currentVal===undefined?'':String(currentVal);
+  inp.value=currentStr;
   td.innerHTML=''; td.appendChild(inp);
   inp.focus(); inp.select();
 
   function save(){
     var newVal=inp.value.trim();
-    var oldVal=String(currentVal||'').trim();
     td.classList.remove('editing');
     td.textContent=newVal;
-    if(newVal===oldVal) return; // nessuna modifica
-    // Aggiorna dati in memoria
+    if(newVal===currentStr) return; // nessuna modifica
     currentData[sheetName].rows[rowIdx][colIdx]=newVal;
-    // Salva su Drive
     saveCellToDrive(sheetName, rowIdx, colIdx, newVal);
   }
 
   inp.addEventListener('blur', save);
   inp.addEventListener('keydown', function(e){
     if(e.key==='Enter'){ e.preventDefault(); inp.blur(); }
-    if(e.key==='Escape'){ inp.removeEventListener('blur',save); td.classList.remove('editing'); td.textContent=currentVal||''; }
+    if(e.key==='Escape'){ inp.removeEventListener('blur',save); td.classList.remove('editing'); td.textContent=currentStr; }
   });
 }
 
 function saveCellToDrive(sheetName, rowIdx, colIdx, newVal){
-  // Trova il DocNum della riga per sapere su quale file scrivere
-  var docNum=norm(currentData[sheetName].rows[rowIdx][0]);
+  var row=currentData[sheetName].rows[rowIdx];
+  var docNum=norm(row[0]);
+  var fileRowIdx=row.__fileRowIdx; // indice riga esatto nel file xlsx
   var fileId=currentFileIds[docNum];
   if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
+  if(fileRowIdx===undefined){ showToast('✗ Indice riga non trovato'); return; }
 
   setAwbSt('loading','⏳ Salvataggio cella...');
   downloadFile(fileId)
-  .then(function(blob){ return modifyCellInBlob(blob, sheetName, docNum, colIdx, newVal); })
+  .then(function(blob){ return modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal); })
   .then(function(nb){ return uploadFile(fileId, nb, ''); })
   .then(function(){
     setAwbSt('ok','✓ Cella salvata');
@@ -401,7 +401,7 @@ function saveCellToDrive(sheetName, rowIdx, colIdx, newVal){
   .catch(function(e){ setAwbSt('err','✗ '+e.message); });
 }
 
-function modifyCellInBlob(blob, sheetName, docNum, colIdx, newVal){
+function modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
     reader.onload=function(e){
@@ -410,15 +410,9 @@ function modifyCellInBlob(blob, sheetName, docNum, colIdx, newVal){
         var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sheetName.trim().toLowerCase();});
         if(!rn) throw new Error('Sheet '+sheetName+' non trovato');
         var ws=wb.Sheets[rn];
-        var range=XLSX.utils.decode_range(ws['!ref']||'A1');
-        for(var r=2;r<=range.e.r;r++){
-          var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
-          if(ca&&norm(ca.v)===docNum){
-            var cellAddr=XLSX.utils.encode_cell({r:r,c:colIdx});
-            ws[cellAddr]=newVal===''?{t:'z',v:''}:{t:'s',v:newVal};
-            break;
-          }
-        }
+        var cellAddr=XLSX.utils.encode_cell({r:fileRowIdx, c:colIdx});
+        if(newVal===''){ delete ws[cellAddr]; }
+        else { ws[cellAddr]={t:'s',v:newVal}; }
         var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
         resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       }catch(err){reject(err);}
@@ -709,8 +703,14 @@ function parseXlsx(blob){
           var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sn.trim().toLowerCase();});
           if(!rn){out[sn]={headers:[],rows:[]};return;}
           var raw=XLSX.utils.sheet_to_json(wb.Sheets[rn],{header:1,defval:''});
-          var rows=raw.slice(2).filter(function(r){return r.some(function(c){return c!=='';});});
-          rows=rows.map(function(row){return row.map(function(c){return c instanceof Date?fmtDate(c):c;});});
+          var rows=[];
+          for(var i=2;i<raw.length;i++){
+            var row=raw[i];
+            if(!row.some(function(c){return c!=='';})) continue;
+            var mapped=row.map(function(c){return c instanceof Date?fmtDate(c):c;});
+            mapped.__fileRowIdx=i; // salva indice riga originale nel file xlsx (0-based)
+            rows.push(mapped);
+          }
           out[sn]={headers:raw.slice(0,2),rows:rows};
         });
         resolve(out);
