@@ -187,9 +187,11 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
       <div class="fl">Data</div>
       <div style="display:flex;gap:6px;align-items:center">
         <select id="fDate" class="fc" onchange="onDateChange();loadData()" style="min-width:110px"><option>Caricamento...</option></select>
-        <span style="font-size:11px;color:var(--muted)">→</span>
-        <select id="fDateTo" class="fc" onchange="loadData()" style="min-width:110px"><option value="">Stessa data</option></select>
       </div>
+    </div>
+    <div class="fg">
+      <div class="fl">A Data</div>
+      <select id="fDateTo" class="fc" onchange="loadData()" style="min-width:110px"><option value="">Stessa data</option></select>
     </div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
@@ -697,13 +699,15 @@ function fillSelect(id,obj,placeholder){
 }
 
 function fillSelectAwb(id,obj){
-  var sel=document.getElementById(id),prev=sel.value;
+  var sel=document.getElementById(id), prev=sel.value;
   sel.innerHTML='<option value="">— Tutti —</option><option value="__VUOTI__">— Vuoti —</option>';
   Object.keys(obj).sort().forEach(function(v){
     var o=document.createElement('option'); o.value=v; o.text=v;
-    if(v===prev)o.selected=true; sel.appendChild(o);
+    sel.appendChild(o);
   });
-  if(prev&&sel.value!==prev) sel.value='';
+  // Ripristina sempre la selezione precedente —
+  // '' e '__VUOTI__' sono sempre presenti, i valori dinamici solo se ancora nel file
+  sel.value=prev||'';
 }
 function fillDatalist(id,obj){
   var dl=document.getElementById(id); if(!dl)return;
