@@ -183,13 +183,20 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   </div>
 
   <div class="filters">
-    <div class="fg"><div class="fl">Data</div><select id="fDate" class="fc" onchange="onDateChange();loadData()"><option>Caricamento...</option></select></div>
+    <div class="fg">
+      <div class="fl">Data</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select id="fDate" class="fc" onchange="onDateChange();loadData()" style="min-width:110px"><option>Caricamento...</option></select>
+        <span style="font-size:11px;color:var(--muted)">→</span>
+        <select id="fDateTo" class="fc" onchange="loadData()" style="min-width:110px"><option value="">Stessa data</option></select>
+      </div>
+    </div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
     <div class="fg"><div class="fl">Tipo Spedizione</div><select id="fTipo" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
-    <div class="fg"><div class="fl">Destino</div><input id="fDestino" class="fc" type="text" list="listDestino" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listDestino"></datalist></div>
-    <div class="fg"><div class="fl">AWB</div><input id="fAwb" class="fc" type="text" list="listAwb" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listAwb"></datalist></div>
-    <div class="fg"><div class="fl">Numero ODP</div><input id="fOdp" class="fc" type="text" list="listOdp" placeholder="Tutti..." autocomplete="off" style="min-width:150px" onchange="currentData&&loadData()"><datalist id="listOdp"></datalist></div>
+    <div class="fg"><div class="fl">Destino</div><select id="fDestino" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
+    <div class="fg"><div class="fl">AWB</div><select id="fAwb" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option><option value="__VUOTI__">— Vuoti —</option></select></div>
+    <div class="fg"><div class="fl">Numero ODP</div><select id="fOdp" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dal file">↻ Aggiorna</button>
     <button class="btn-download" id="btnDownload" onclick="downloadFiltered()" disabled title="Scarica Excel filtrato">⬇ Scarica Excel</button>
@@ -458,19 +465,19 @@ function extractDate(name){
 
 function loadDates(){
   var sel=document.getElementById('fDate');
+  var selTo=document.getElementById('fDateTo');
   sel.innerHTML='<option>Caricamento...</option>';
-  // Prende tutti gli xlsx nella cartella
   listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
     var set={};
     files.forEach(function(f){ var d=extractDate(f.name); if(d) set[d]=true; });
     var dates=Object.keys(set).sort().reverse();
-    sel.innerHTML='';
+    sel.innerHTML=''; selTo.innerHTML='<option value="">Stessa data</option>';
     if(!dates.length){ sel.innerHTML='<option value="">Nessun file trovato</option>'; return; }
     dates.forEach(function(d){
-      var o=document.createElement('option');
-      o.value=d; o.text=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
-      sel.appendChild(o);
+      var txt=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
+      var o1=document.createElement('option'); o1.value=d; o1.text=txt; sel.appendChild(o1);
+      var o2=document.createElement('option'); o2.value=d; o2.text=txt; selTo.appendChild(o2);
     });
     sel.selectedIndex=0;
     document.getElementById('btnLoad').disabled=false;
@@ -481,28 +488,34 @@ function onDateChange(){
   document.getElementById('btnLoad').disabled=!document.getElementById('fDate').value;
 }
 
-// ── CARICA DATI (merge di tutti i file della data) ────────────
+// ── CARICA DATI (merge di tutti i file della data o range) ────────────
 function loadData(){
-  var date=document.getElementById('fDate').value; if(!date)return;
+  var dateFrom=document.getElementById('fDate').value; if(!dateFrom)return;
+  var dateTo=document.getElementById('fDateTo').value||dateFrom;
+  if(dateTo<dateFrom) dateTo=dateFrom; // sicurezza
   var fPlant   =document.getElementById('fPlant').value.trim();
   var fCommessa=document.getElementById('fCommessa').value.trim();
   var fTipo    =document.getElementById('fTipo').value.trim();
   var fDestino =document.getElementById('fDestino').value.trim();
   var fAwb     =document.getElementById('fAwb').value.trim();
   var fOdp     =document.getElementById('fOdp').value.trim();
-  currentDate=date; AWB_MAP={}; currentData=null; currentFileIds={};
-  setContent(spinnerHtml('Ricerca file per '+date.substr(6,2)+'/'+date.substr(4,2)+'/'+date.substr(0,4)+'...',10));
+  currentDate=dateFrom; AWB_MAP={}; currentData=null; currentFileIds={};
+  var rangeLabel=dateFrom===dateTo
+    ? dateFrom.substr(6,2)+'/'+dateFrom.substr(4,2)+'/'+dateFrom.substr(0,4)
+    : dateFrom.substr(6,2)+'/'+dateFrom.substr(4,2)+'/'+dateFrom.substr(0,4)+' → '+dateTo.substr(6,2)+'/'+dateTo.substr(4,2)+'/'+dateTo.substr(0,4);
+  setContent(spinnerHtml('Ricerca file per '+rangeLabel+'...',10));
   document.getElementById('statsBar').style.display='none';
   setAwbSt('','');
 
-  // Trova tutti i file con questa data alla fine del nome
-  listFiles('"'+FOLDER_ID+'" in parents and name contains "'+date+'" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+  listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
-    // Filtra solo quelli che finiscono esattamente con _DATE.xlsx o DATE.xlsx
-    files=files.filter(function(f){ return extractDate(f.name)===date; });
-    if(!files.length) throw new Error('Nessun file trovato per la data '+date);
+    // Filtra i file nel range di date
+    files=files.filter(function(f){
+      var d=extractDate(f.name);
+      return d && d>=dateFrom && d<=dateTo;
+    });
+    if(!files.length) throw new Error('Nessun file trovato per il periodo '+rangeLabel);
     setContent(spinnerHtml('Download '+files.length+' file...',20));
-    // Scarica tutti in parallelo
     return Promise.all(files.map(function(f){
       return downloadFile(f.id).then(function(blob){
         return {blob:blob, id:f.id, name:f.name};
@@ -579,7 +592,12 @@ function applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fAwb,fOdp){
   }
   if(fAwb){
     var mdAwb={};
-    intRows.forEach(function(r){ if(String(r[3]||'').trim()===fAwb) mdAwb[norm(r[0])]=true; });
+    if(fAwb==='__VUOTI__'){
+      // Solo righe con AWB vuoto
+      intRows.forEach(function(r){ if(String(r[3]||'').trim()==='') mdAwb[norm(r[0])]=true; });
+    } else {
+      intRows.forEach(function(r){ if(String(r[3]||'').trim()===fAwb) mdAwb[norm(r[0])]=true; });
+    }
     if(md){ Object.keys(md).forEach(function(k){if(!mdAwb[k])delete md[k];}); }
     else md=mdAwb;
   }
@@ -656,15 +674,16 @@ function populateFilters(intRows,odpRows){
     var t=String(r[6]||'').trim();
     var d=String(r[8]||'').trim();
     var a=String(r[3]||'').trim();
-    if(p)plants[p]=true; if(c)commesse[c]=true; if(t)tipi[t]=true; if(d)destini[d]=true; if(a)awbs[a]=true;
+    if(p)plants[p]=true; if(c)commesse[c]=true; if(t)tipi[t]=true;
+    if(d)destini[d]=true; if(a)awbs[a]=true;
   });
   odpRows.forEach(function(r){ var o=String(r[2]||'').trim(); if(o)odps[o]=true; });
   fillSelect('fPlant',plants,'— Tutti —');
   fillSelect('fCommessa',commesse,'— Tutte —');
   fillSelect('fTipo',tipi,'— Tutti —');
-  fillDatalist('listDestino',destini);
-  fillDatalist('listAwb',awbs);
-  fillDatalist('listOdp',odps);
+  fillSelect('fDestino',destini,'— Tutti —');
+  fillSelectAwb('fAwb',awbs);
+  fillSelect('fOdp',odps,'— Tutti —');
 }
 function fillSelect(id,obj,placeholder){
   var sel=document.getElementById(id),prev=sel.value;
@@ -673,6 +692,18 @@ function fillSelect(id,obj,placeholder){
     var o=document.createElement('option'); o.value=v; o.text=v;
     if(v===prev)o.selected=true; sel.appendChild(o);
   });
+  // Ripristina selezione precedente se ancora valida
+  if(prev&&sel.value!==prev) sel.value='';
+}
+
+function fillSelectAwb(id,obj){
+  var sel=document.getElementById(id),prev=sel.value;
+  sel.innerHTML='<option value="">— Tutti —</option><option value="__VUOTI__">— Vuoti —</option>';
+  Object.keys(obj).sort().forEach(function(v){
+    var o=document.createElement('option'); o.value=v; o.text=v;
+    if(v===prev)o.selected=true; sel.appendChild(o);
+  });
+  if(prev&&sel.value!==prev) sel.value='';
 }
 function fillDatalist(id,obj){
   var dl=document.getElementById(id); if(!dl)return;
@@ -749,8 +780,11 @@ function renderAll(sheets){
   document.getElementById('sOdp').textContent=odp.rows.length;
   document.getElementById('sAwb').textContent=awbCnt+' / '+int.rows.length;
   document.getElementById('statsBar').style.display='flex';
-  var d=currentDate;
-  document.getElementById('fInfo').textContent=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4)+' · '+int.rows.length+' spedizioni';
+  var dateTo=document.getElementById('fDateTo').value||currentDate;
+  var rangeLabel=currentDate===dateTo
+    ? currentDate.substr(6,2)+'/'+currentDate.substr(4,2)+'/'+currentDate.substr(0,4)
+    : currentDate.substr(6,2)+'/'+currentDate.substr(4,2)+'/'+currentDate.substr(0,4)+' → '+dateTo.substr(6,2)+'/'+dateTo.substr(4,2)+'/'+dateTo.substr(0,4);
+  document.getElementById('fInfo').textContent=rangeLabel+' · '+int.rows.length+' spedizioni';
   var h='<div class="tabs">';
   h+=tabBtn('ti','Intestazione',int.rows.length,true);
   h+=tabBtn('tc','Dettagli Carico',car.rows.length,false);
