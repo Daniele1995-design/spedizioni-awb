@@ -205,12 +205,12 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="filters">
     <div class="fg">
       <div class="fl">Data</div>
-      <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:0;width:106px" onchange="onDateChange();loadData()">
+      <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:0;width:126px" onchange="onDateChange();loadData()">
       <datalist id="listDates"></datalist>
     </div>
     <div class="fg">
       <div class="fl">A Data</div>
-      <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:0;width:106px" onchange="currentData&&loadData()">
+      <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:0;width:126px" onchange="currentData&&loadData()">
       <datalist id="listDatesTo"></datalist>
     </div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
@@ -581,21 +581,32 @@ document.addEventListener('click',function(e){
 // ── ELIMINA RIGA (Dettagli Carico / ODP) ──────
 function deleteRow(sheetName, rowIdx){
   var row=currentData[sheetName].rows[rowIdx];
+  if(!row){ showToast('✗ Riga non trovata'); return; }
   var docNum=norm(row[0]);
   var fileRowIdx=row.__fileRowIdx;
+  var fileId=currentFileIds[docNum];
+  if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
+  if(fileRowIdx===undefined||fileRowIdx===null){ showToast('✗ Indice riga mancante'); return; }
+  // Cattura riferimento diretto alla riga — non usare rowIdx nel callback
+  var rowRef=row;
   showConfirm(
     'Elimina riga',
     'Stai per eliminare la riga <strong>'+esc(String(row[0]||''))+'</strong> da <strong>'+sheetName+'</strong>.<br>Questa operazione è irreversibile.',
     function(){
-      var fileId=currentFileIds[docNum];
-      if(!fileId){ showToast('✗ FileId non trovato'); return; }
       setAwbSt('loading','⏳ Eliminazione riga...');
       downloadFile(fileId)
       .then(function(blob){ return deleteRowInBlob(blob, sheetName, fileRowIdx); })
       .then(function(nb){ return uploadFile(fileId, nb, ''); })
       .then(function(){
-        // Rimuovi dalla memoria
-        currentData[sheetName].rows.splice(rowIdx,1);
+        // Aggiorna __fileRowIdx per le righe successive nello stesso file
+        SHEET_NAMES.forEach(function(sn){
+          currentData[sn].rows.forEach(function(r){
+            if(currentFileIds[norm(r[0])]===fileId && r.__fileRowIdx>fileRowIdx) r.__fileRowIdx--;
+          });
+        });
+        // Rimuovi per riferimento diretto
+        var idx=currentData[sheetName].rows.indexOf(rowRef);
+        if(idx!==-1) currentData[sheetName].rows.splice(idx,1);
         renderAll(currentData);
         setAwbSt('ok','✓ Riga eliminata');
         setTimeout(function(){ setAwbSt('',''); },2000);
@@ -608,19 +619,19 @@ function deleteRow(sheetName, rowIdx){
 // ── ELIMINA DOCNUM (Intestazione + tutte le sheet) ──
 function deleteDocNum(rowIdx){
   var row=currentData['Intestazione'].rows[rowIdx];
+  if(!row){ showToast('✗ Riga non trovata'); return; }
   var docNum=norm(row[0]);
   var fileId=currentFileIds[docNum];
+  if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
   showConfirm(
     'Elimina spedizione',
     'Stai per eliminare <strong>'+esc(String(row[0]||''))+'</strong> da <strong>tutte e 3 le sheet</strong> del file.<br>Questa operazione è irreversibile.',
     function(){
-      if(!fileId){ showToast('✗ FileId non trovato'); return; }
       setAwbSt('loading','⏳ Eliminazione spedizione...');
       downloadFile(fileId)
       .then(function(blob){ return deleteDocNumInBlob(blob, docNum); })
       .then(function(nb){ return uploadFile(fileId, nb, ''); })
       .then(function(){
-        // Rimuovi dalla memoria in tutte le sheet
         SHEET_NAMES.forEach(function(sn){
           currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
         });
@@ -1097,16 +1108,23 @@ function renderTable(sd,isInt,sheetName){
   var hdr=sd.headers||[],rows=sd.rows||[];
   if(!rows.length)return '<div class="state"><div class="state-ico">🔍</div><div class="state-title">Nessun dato</div><div>Nessuna riga trovata con i filtri selezionati.</div></div>';
   var nc=Math.max(hdr.length>0?hdr[0].length:0,rows.length>0?rows[0].length:0);
+  var destiMap={};
+  if(!isInt&&currentData&&currentData['Intestazione']){
+    currentData['Intestazione'].rows.forEach(function(r){ destiMap[norm(r[0])]=String(r[8]||'').trim(); });
+  }
+  var showDest=!isInt;
   var h='<div class="tbl-wrap"><table><thead>';
   if(hdr[0]){
     h+='<tr>';
     if(adminMode) h+='<th></th>';
+    if(showDest) h+='<th style="color:var(--amber);opacity:.6;font-size:9px">U_DEST</th>';
     for(var c=0;c<nc;c++) h+='<th>'+esc(hdr[0][c]||'')+'</th>';
     h+='</tr>';
   }
   if(hdr[1]){
     h+='<tr>';
     if(adminMode) h+='<th></th>';
+    if(showDest) h+='<th style="color:var(--amber);font-size:11px;font-weight:600">DESTINO</th>';
     for(var c=0;c<nc;c++) h+='<th>'+esc(hdr[1][c]||'')+'</th>';
     h+='</tr>';
   }
@@ -1114,32 +1132,38 @@ function renderTable(sd,isInt,sheetName){
   rows.forEach(function(row,ri){
     var dn=norm(row[0]); h+='<tr>';
     if(adminMode){
-      var delFn=isInt ? 'deleteDocNum('+ri+')' : 'deleteRow(\''+sheetName+'\','+ri+')';
+      var sn2=sheetName.replace(/'/g,"\\'");
+      var delFn=isInt?'deleteDocNum('+ri+')':'deleteRow(\''+sn2+'\','+ri+')';
       h+='<td class="td-del"><button class="btn-del-row" onclick="'+delFn+'" title="Elimina">🗑</button></td>';
+    }
+    if(showDest){
+      h+='<td style="font-size:11px;color:var(--amber);font-weight:500;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis">'+esc(destiMap[dn]||'')+'</td>';
     }
     for(var c=0;c<nc;c++){
       var v=row[c]!==undefined?row[c]:'';
       var isAwbCol=isInt&&c===3;
       var isDocNum=c===0;
       var editable=adminMode&&!isDocNum;
-      var editAttr=editable?' class="editable" onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'';
+      var sn3=sheetName.replace(/'/g,"\\'");
+      var editAttr=editable?' class="editable" onclick="startCellEdit(this,\''+sn3+'\','+ri+','+c+')"':'';
       if(isDocNum){
         h+='<td class="dn">'+esc(String(v))+'</td>';
       } else if(isAwbCol){
         var awb=AWB_MAP[dn]||String(v||'');
-        h+=awb?'<td class="awb-val'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>'+esc(awb)+'</td>':'<td class="awb-empty'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>·</td>';
+        h+=awb?'<td class="awb-val'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sn3+'\','+ri+','+c+')"':'')+'>'+esc(awb)+'</td>':'<td class="awb-empty'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sn3+'\','+ri+','+c+')"':'')+'>·</td>';
       } else {
         h+='<td'+editAttr+'>'+esc(String(v===null||v===undefined?'':v))+'</td>';
       }
     }
     h+='</tr>';
-    // In admin mode, aggiungi pulsante ➕ alla fine di ogni gruppo DocNum (solo Carico/ODP)
     if(adminMode&&!isInt){
       var isLastInGroup=(ri===rows.length-1)||norm(rows[ri+1][0])!==dn;
       if(isLastInGroup){
+        var sn4=sheetName.replace(/'/g,"\\'");
+        var dn2=dn.replace(/'/g,"\\'");
         h+='<tr class="tr-add">';
-        h+='<td class="td-del"><button class="btn-add-row" onclick="addRow(\''+sheetName+'\',\''+dn+'\')" title="Aggiungi riga">➕</button></td>';
-        h+='<td colspan="'+nc+'" style="font-size:11px;color:var(--muted);padding-left:8px">+ aggiungi riga per '+esc(dn)+'</td>';
+        h+='<td class="td-del"><button class="btn-add-row" onclick="addRow(\''+sn4+'\',\''+dn2+'\')" title="Aggiungi riga">➕</button></td>';
+        h+='<td colspan="'+(nc+(showDest?1:0))+'" style="font-size:11px;color:var(--muted);padding-left:8px">+ aggiungi riga per '+esc(dn)+'</td>';
         h+='</tr>';
       }
     }
