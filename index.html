@@ -310,6 +310,7 @@ function onToken(resp){
     return;
   }
   TOKEN=resp.access_token;
+  try { var _bc=new BroadcastChannel('vdc_oauth');_bc.postMessage({vdc_token:resp.access_token,vdc_exp:Date.now()+(resp.expires_in||3600)*1000});_bc.close(); } catch(e){}
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo(); loadDates();
