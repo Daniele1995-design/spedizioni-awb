@@ -68,6 +68,22 @@ body.admin-mode td.editable{cursor:cell;position:relative}
 body.admin-mode td.editable:hover{background:rgba(59,130,246,.08);outline:1px solid var(--blue)}
 td.editing{padding:0!important}
 td.editing input{width:100%;height:100%;min-height:32px;background:var(--card);border:2px solid var(--blue);border-radius:0;padding:6px 10px;font-family:var(--ff-mono);font-size:12px;color:var(--text);outline:none;box-sizing:border-box}
+/* DELETE ROW BUTTON */
+.btn-del-row{background:none;border:none;color:var(--border);cursor:pointer;padding:2px 6px;font-size:14px;border-radius:4px;transition:all .15s;line-height:1;flex-shrink:0}
+.btn-del-row:hover{color:var(--red);background:rgba(239,68,68,.1)}
+td.td-del{width:28px;padding:4px 4px;border-right:1px solid rgba(36,48,72,.5);text-align:center}
+/* CONFIRM MODAL */
+.modal-overlay.confirm .modal{max-width:380px}
+.modal-warn{font-size:13px;color:var(--subtle);line-height:1.6}
+/* DELETE ROW in admin mode */
+.btn-del-row{background:none;border:none;color:var(--border);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all .15s;line-height:1}
+body.admin-mode .btn-del-row{color:var(--muted)}
+body.admin-mode .btn-del-row:hover{background:rgba(239,68,68,.15);color:var(--red)}
+/* CONFIRM MODAL */
+.modal-btn.danger{background:var(--red);color:#fff}
+.modal-btn.danger:hover{background:#dc2626}
+/* DATE INPUT */
+input[type=date].fc{min-width:130px;color-scheme:dark}
 .awb-panel{background:linear-gradient(135deg,#160f00 0%,#1a1500 50%,#0d1117 100%);border-bottom:2px solid var(--amber-dim);padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;flex-shrink:0}
 .awb-label{font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);flex-shrink:0;display:flex;align-items:center;gap:8px}
 .awb-dot{width:8px;height:8px;background:var(--amber);border-radius:50%;animation:pulse 2s infinite}
@@ -176,7 +192,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="awb-panel">
     <div class="awb-label"><div class="awb-dot"></div>Inserisci AWB</div>
     <div class="awb-wrap">
-      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare alle righe" maxlength="60">
+      <input id="awbInput" class="awb-input" type="text" placeholder="Codice AWB · Invio per applicare a tutte le righe filtrate" maxlength="60">
       <button class="btn-awb" id="btnAwb" onclick="applyAwb()">Applica AWB</button>
     </div>
     <div id="awbStatus" class="awb-status"></div>
@@ -185,13 +201,13 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="filters">
     <div class="fg">
       <div class="fl">Data</div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <select id="fDate" class="fc" onchange="onDateChange();loadData()" style="min-width:110px"><option>Caricamento...</option></select>
-      </div>
+      <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:120px" onchange="onDateChange();loadData()">
+      <datalist id="listDates"></datalist>
     </div>
     <div class="fg">
       <div class="fl">A Data</div>
-      <select id="fDateTo" class="fc" onchange="loadData()" style="min-width:110px"><option value="">Stessa data</option></select>
+      <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:120px" onchange="currentData&&loadData()">
+      <datalist id="listDatesTo"></datalist>
     </div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
@@ -232,6 +248,17 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <div class="modal-btns">
       <button class="modal-btn cancel" onclick="closeAdminModal()">Annulla</button>
       <button class="modal-btn ok" onclick="confirmAdmin()">Accedi</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal-overlay hide confirm">
+  <div class="modal">
+    <div class="modal-title" id="confirmTitle">Conferma eliminazione</div>
+    <div class="modal-warn" id="confirmMsg"></div>
+    <div class="modal-btns" style="margin-top:8px">
+      <button class="modal-btn cancel" onclick="closeConfirm()">Annulla</button>
+      <button class="modal-btn ok" style="background:var(--red)" id="confirmOkBtn">Elimina</button>
     </div>
   </div>
 </div>
@@ -283,18 +310,6 @@ function onToken(resp){
     return;
   }
   TOKEN=resp.access_token;
-
-  // ── VDC BRIDGE ──
-  try {
-    var bc = new BroadcastChannel('vdc_oauth_channel');
-    bc.postMessage({
-      vdc_token: resp.access_token,
-      vdc_exp:   Date.now() + (resp.expires_in || 3600) * 1000
-    });
-    bc.close();
-  } catch(e) {}
-  // ── FINE VDC BRIDGE ──
-
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo(); loadDates();
@@ -443,6 +458,148 @@ function modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal){
   });
 }
 
+// ── CONFERMA ELIMINA ──────────────────────────
+var confirmCallback=null;
+function showConfirm(title,msg,cb){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMsg').innerHTML=msg;
+  confirmCallback=cb;
+  document.getElementById('confirmModal').classList.remove('hide');
+}
+function closeConfirm(){
+  document.getElementById('confirmModal').classList.add('hide');
+  confirmCallback=null;
+}
+document.getElementById('confirmOkBtn').addEventListener('click',function(){
+  closeConfirm();
+  if(confirmCallback) confirmCallback();
+});
+document.addEventListener('click',function(e){
+  if(e.target.id==='confirmModal') closeConfirm();
+});
+
+// ── ELIMINA RIGA (Dettagli Carico / ODP) ──────
+function deleteRow(sheetName, rowIdx){
+  var row=currentData[sheetName].rows[rowIdx];
+  var docNum=norm(row[0]);
+  var fileRowIdx=row.__fileRowIdx;
+  showConfirm(
+    'Elimina riga',
+    'Stai per eliminare la riga <strong>'+esc(String(row[0]||''))+'</strong> da <strong>'+sheetName+'</strong>.<br>Questa operazione è irreversibile.',
+    function(){
+      var fileId=currentFileIds[docNum];
+      if(!fileId){ showToast('✗ FileId non trovato'); return; }
+      setAwbSt('loading','⏳ Eliminazione riga...');
+      downloadFile(fileId)
+      .then(function(blob){ return deleteRowInBlob(blob, sheetName, fileRowIdx); })
+      .then(function(nb){ return uploadFile(fileId, nb, ''); })
+      .then(function(){
+        // Rimuovi dalla memoria
+        currentData[sheetName].rows.splice(rowIdx,1);
+        renderAll(currentData);
+        setAwbSt('ok','✓ Riga eliminata');
+        setTimeout(function(){ setAwbSt('',''); },2000);
+      })
+      .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+    }
+  );
+}
+
+// ── ELIMINA DOCNUM (Intestazione + tutte le sheet) ──
+function deleteDocNum(rowIdx){
+  var row=currentData['Intestazione'].rows[rowIdx];
+  var docNum=norm(row[0]);
+  var fileId=currentFileIds[docNum];
+  showConfirm(
+    'Elimina spedizione',
+    'Stai per eliminare <strong>'+esc(String(row[0]||''))+'</strong> da <strong>tutte e 3 le sheet</strong> del file.<br>Questa operazione è irreversibile.',
+    function(){
+      if(!fileId){ showToast('✗ FileId non trovato'); return; }
+      setAwbSt('loading','⏳ Eliminazione spedizione...');
+      downloadFile(fileId)
+      .then(function(blob){ return deleteDocNumInBlob(blob, docNum); })
+      .then(function(nb){ return uploadFile(fileId, nb, ''); })
+      .then(function(){
+        // Rimuovi dalla memoria in tutte le sheet
+        SHEET_NAMES.forEach(function(sn){
+          currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
+        });
+        renderAll(currentData);
+        setAwbSt('ok','✓ Spedizione eliminata');
+        setTimeout(function(){ setAwbSt('',''); },2000);
+      })
+      .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+    }
+  );
+}
+
+function deleteRowInBlob(blob, sheetName, fileRowIdx){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+        var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sheetName.trim().toLowerCase();});
+        if(!rn) throw new Error('Sheet '+sheetName+' non trovato');
+        var ws=wb.Sheets[rn];
+        var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+        // Sposta tutte le righe dopo fileRowIdx di una posizione su
+        for(var r=fileRowIdx;r<range.e.r;r++){
+          for(var c=0;c<=range.e.c;c++){
+            var from=XLSX.utils.encode_cell({r:r+1,c:c});
+            var to=XLSX.utils.encode_cell({r:r,c:c});
+            if(ws[from]) ws[to]=ws[from]; else delete ws[to];
+          }
+        }
+        // Elimina ultima riga
+        for(var c=0;c<=range.e.c;c++) delete ws[XLSX.utils.encode_cell({r:range.e.r,c:c})];
+        range.e.r--;
+        ws['!ref']=XLSX.utils.encode_range(range);
+        resolve(new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      }catch(err){reject(err);}
+    };
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
+  });
+}
+
+function deleteDocNumInBlob(blob, docNum){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+        SHEET_NAMES.forEach(function(sn){
+          var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sn.trim().toLowerCase();});
+          if(!rn) return;
+          var ws=wb.Sheets[rn];
+          var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+          // Trova tutte le righe con questo DocNum e rimuovile dal basso verso l'alto
+          var toDelete=[];
+          for(var r=2;r<=range.e.r;r++){
+            var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
+            if(ca&&norm(ca.v)===docNum) toDelete.push(r);
+          }
+          // Elimina dal basso per non alterare gli indici
+          toDelete.reverse().forEach(function(ri){
+            for(var rr=ri;rr<range.e.r;rr++){
+              for(var c=0;c<=range.e.c;c++){
+                var from=XLSX.utils.encode_cell({r:rr+1,c:c});
+                var to=XLSX.utils.encode_cell({r:rr,c:c});
+                if(ws[from]) ws[to]=ws[from]; else delete ws[to];
+              }
+            }
+            for(var c=0;c<=range.e.c;c++) delete ws[XLSX.utils.encode_cell({r:range.e.r,c:c})];
+            range.e.r--;
+          });
+          ws['!ref']=XLSX.utils.encode_range(range);
+        });
+        resolve(new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      }catch(err){reject(err);}
+    };
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
+  });
+}
+
 // ── COPY MODE ─────────────────────────────────
 function toggleCopyMode(on){
   copyModeOn=on;
@@ -477,36 +634,54 @@ function extractDate(name){
   var m=name.match(/(\d{8})\.xlsx$/i); return m?m[1]:null;
 }
 
+// Date disponibili (YYYYMMDD) caricate da Drive
+var availableDates=[];
+
 function loadDates(){
-  var sel=document.getElementById('fDate');
-  var selTo=document.getElementById('fDateTo');
-  sel.innerHTML='<option>Caricamento...</option>';
+  var dl=document.getElementById('listDates');
+  var dlTo=document.getElementById('listDatesTo');
+  dl.innerHTML=''; dlTo.innerHTML='';
   listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
     var set={};
     files.forEach(function(f){ var d=extractDate(f.name); if(d) set[d]=true; });
-    var dates=Object.keys(set).sort().reverse();
-    sel.innerHTML=''; selTo.innerHTML='<option value="">Stessa data</option>';
-    if(!dates.length){ sel.innerHTML='<option value="">Nessun file trovato</option>'; return; }
-    dates.forEach(function(d){
+    availableDates=Object.keys(set).sort().reverse();
+    availableDates.forEach(function(d){
       var txt=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
-      var o1=document.createElement('option'); o1.value=d; o1.text=txt; sel.appendChild(o1);
-      var o2=document.createElement('option'); o2.value=d; o2.text=txt; selTo.appendChild(o2);
+      var o1=document.createElement('option'); o1.value=txt; dl.appendChild(o1);
+      var o2=document.createElement('option'); o2.value=txt; dlTo.appendChild(o2);
     });
-    sel.selectedIndex=0;
-    document.getElementById('btnLoad').disabled=false;
-  }).catch(function(){ sel.innerHTML='<option>Errore</option>'; });
+    // Seleziona la prima data automaticamente
+    if(availableDates.length){
+      var first=availableDates[0];
+      document.getElementById('fDate').value=first.substr(6,2)+'/'+first.substr(4,2)+'/'+first.substr(0,4);
+      document.getElementById('btnLoad').disabled=false;
+      loadData();
+    }
+  }).catch(function(){});
+}
+
+// Converte GG/MM/AAAA → YYYYMMDD, oppure se già YYYYMMDD lo lascia
+function parseInputDate(str){
+  str=(str||'').trim();
+  // formato GG/MM/AAAA
+  var m=str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(m) return m[3]+m[2]+m[1];
+  // formato YYYYMMDD diretto
+  if(/^\d{8}$/.test(str)) return str;
+  return null;
 }
 
 function onDateChange(){
-  document.getElementById('btnLoad').disabled=!document.getElementById('fDate').value;
+  var d=parseInputDate(document.getElementById('fDate').value);
+  document.getElementById('btnLoad').disabled=!d;
 }
 
 // ── CARICA DATI (merge di tutti i file della data o range) ────────────
 function loadData(){
-  var dateFrom=document.getElementById('fDate').value; if(!dateFrom)return;
-  var dateTo=document.getElementById('fDateTo').value||dateFrom;
-  if(dateTo<dateFrom) dateTo=dateFrom; // sicurezza
+  var dateFrom=parseInputDate(document.getElementById('fDate').value); if(!dateFrom)return;
+  var dateTo=parseInputDate(document.getElementById('fDateTo').value)||dateFrom;
+  if(dateTo<dateFrom) dateTo=dateFrom;
   var fPlant   =document.getElementById('fPlant').value.trim();
   var fCommessa=document.getElementById('fCommessa').value.trim();
   var fTipo    =document.getElementById('fTipo').value.trim();
@@ -823,23 +998,36 @@ function renderTable(sd,isInt,sheetName){
   if(!rows.length)return '<div class="state"><div class="state-ico">🔍</div><div class="state-title">Nessun dato</div><div>Nessuna riga trovata con i filtri selezionati.</div></div>';
   var nc=Math.max(hdr.length>0?hdr[0].length:0,rows.length>0?rows[0].length:0);
   var h='<div class="tbl-wrap"><table><thead>';
-  if(hdr[0]){h+='<tr>';for(var c=0;c<nc;c++)h+='<th>'+esc(hdr[0][c]||'')+'</th>';h+='</tr>';}
-  if(hdr[1]){h+='<tr>';for(var c=0;c<nc;c++)h+='<th>'+esc(hdr[1][c]||'')+'</th>';h+='</tr>';}
+  if(hdr[0]){
+    h+='<tr>';
+    if(adminMode) h+='<th></th>';
+    for(var c=0;c<nc;c++) h+='<th>'+esc(hdr[0][c]||'')+'</th>';
+    h+='</tr>';
+  }
+  if(hdr[1]){
+    h+='<tr>';
+    if(adminMode) h+='<th></th>';
+    for(var c=0;c<nc;c++) h+='<th>'+esc(hdr[1][c]||'')+'</th>';
+    h+='</tr>';
+  }
   h+='</thead><tbody>';
   rows.forEach(function(row,ri){
     var dn=norm(row[0]); h+='<tr>';
+    if(adminMode){
+      var delFn=isInt ? 'deleteDocNum('+ri+')' : 'deleteRow(\''+sheetName+'\','+ri+')';
+      h+='<td class="td-del"><button class="btn-del-row" onclick="'+delFn+'" title="Elimina">🗑</button></td>';
+    }
     for(var c=0;c<nc;c++){
       var v=row[c]!==undefined?row[c]:'';
       var isAwbCol=isInt&&c===3;
       var isDocNum=c===0;
-      // In admin mode tutte le celle tranne DocNum sono editabili
       var editable=adminMode&&!isDocNum;
       var editAttr=editable?' class="editable" onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'';
       if(isDocNum){
         h+='<td class="dn">'+esc(String(v))+'</td>';
       } else if(isAwbCol){
         var awb=AWB_MAP[dn]||String(v||'');
-        h+=awb?'<td class="awb-val'+( editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>'+esc(awb)+'</td>':'<td class="awb-empty'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>·</td>';
+        h+=awb?'<td class="awb-val'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>'+esc(awb)+'</td>':'<td class="awb-empty'+(editable?' editable':'')+'"'+(editable?' onclick="startCellEdit(this,\''+sheetName+'\','+ri+','+c+')"':'')+'>·</td>';
       } else {
         h+='<td'+editAttr+'>'+esc(String(v===null||v===undefined?'':v))+'</td>';
       }
