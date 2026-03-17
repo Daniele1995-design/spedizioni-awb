@@ -510,12 +510,50 @@ function addRow(sheetName, docNum){
       // Inserisci la nuova riga in memoria in fondo al gruppo
       var insertIdx=sheetRows.indexOf(lastRow)+1;
       sheetRows.splice(insertIdx,0,newRow);
-      renderAll(currentData);
-      setAwbSt('ok','✓ Riga aggiunta (LineNum '+newLineNum+')');
-      setTimeout(function(){ setAwbSt('',''); },2000);
+      // Aggiunge riga a video senza re-render — l'utente può modificarla subito
+      addRowToDOM(sheetName, newRow, insertIdx, nc);
+      setAwbSt('ok','✓ Riga aggiunta (LineNum '+newLineNum+') — modifica le celle e premi Aggiorna');
+      setTimeout(function(){ setAwbSt('',''); },3000);
     });
   })
   .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+}
+
+function addRowToDOM(sheetName, newRow, rowIdx, nc){
+  var panelId=sheetName==='Dettagli Carico'?'tc':'to';
+  var tbody=document.querySelector('#'+panelId+' tbody');
+  if(!tbody) return;
+  var tr=document.createElement('tr');
+  if(adminMode){
+    var tdDel=document.createElement('td'); tdDel.className='td-del';
+    var btn=document.createElement('button'); btn.className='btn-del-row'; btn.title='Elimina'; btn.textContent='🗑';
+    (function(ri,sn){ btn.onclick=function(){ deleteRow(sn,ri); }; })(rowIdx,sheetName);
+    tdDel.appendChild(btn); tr.appendChild(tdDel);
+  }
+  var tdDest=document.createElement('td');
+  tdDest.style.cssText='font-size:11px;color:var(--amber);font-weight:500;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis';
+  if(currentData&&currentData['Intestazione']){
+    currentData['Intestazione'].rows.forEach(function(r){ if(norm(r[0])===norm(newRow[0])) tdDest.textContent=String(r[8]||'').trim(); });
+  }
+  tr.appendChild(tdDest);
+  for(var c=0;c<nc;c++){
+    var td=document.createElement('td');
+    var v=newRow[c]!==undefined?newRow[c]:'';
+    td.textContent=String(v===null||v===undefined?'':v);
+    if(c===0){ td.className='dn'; }
+    else if(adminMode){
+      td.className='editable';
+      (function(col,ri,sn,tdRef){ tdRef.addEventListener('click',function(){ startCellEdit(tdRef,sn,ri,col); }); })(c,rowIdx,sheetName,td);
+    }
+    tr.appendChild(td);
+  }
+  // Inserisci prima della riga tr-add del gruppo
+  var dn=norm(newRow[0]);
+  var inserted=false;
+  tbody.querySelectorAll('tr.tr-add').forEach(function(ar){
+    if(!inserted&&ar.textContent.indexOf(dn)!==-1){ tbody.insertBefore(tr,ar); inserted=true; }
+  });
+  if(!inserted) tbody.appendChild(tr);
 }
 
 function addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow){
@@ -571,8 +609,9 @@ function closeConfirm(){
   confirmCallback=null;
 }
 document.getElementById('confirmOkBtn').addEventListener('click',function(){
-  closeConfirm();
-  if(confirmCallback) confirmCallback();
+  var cb=confirmCallback; // salva prima di chiudere
+  closeConfirm();         // questo setta confirmCallback=null
+  if(cb) cb();            // esegui il callback salvato
 });
 document.addEventListener('click',function(e){
   if(e.target.id==='confirmModal') closeConfirm();
