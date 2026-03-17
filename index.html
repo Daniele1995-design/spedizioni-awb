@@ -72,6 +72,10 @@ td.editing input{width:100%;height:100%;min-height:32px;background:var(--card);b
 .btn-del-row{background:none;border:none;color:var(--border);cursor:pointer;padding:2px 6px;font-size:14px;border-radius:4px;transition:all .15s;line-height:1;flex-shrink:0}
 .btn-del-row:hover{color:var(--red);background:rgba(239,68,68,.1)}
 td.td-del{width:28px;padding:4px 4px;border-right:1px solid rgba(36,48,72,.5);text-align:center}
+/* ADD ROW BUTTON */
+.btn-add-row{background:none;border:none;color:var(--border);cursor:pointer;padding:2px 6px;font-size:14px;border-radius:4px;transition:all .15s;line-height:1}
+.btn-add-row:hover{color:var(--green);background:rgba(16,185,129,.1)}
+tr.tr-add td{border-bottom:none;padding:2px 4px;background:rgba(16,185,129,.03)}
 /* CONFIRM MODAL */
 .modal-overlay.confirm .modal{max-width:380px}
 .modal-warn{font-size:13px;color:var(--subtle);line-height:1.6}
@@ -201,12 +205,12 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   <div class="filters">
     <div class="fg">
       <div class="fl">Data</div>
-      <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:120px" onchange="onDateChange();loadData()">
+      <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:0;width:106px" onchange="onDateChange();loadData()">
       <datalist id="listDates"></datalist>
     </div>
     <div class="fg">
       <div class="fl">A Data</div>
-      <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:120px" onchange="currentData&&loadData()">
+      <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:0;width:106px" onchange="currentData&&loadData()">
       <datalist id="listDatesTo"></datalist>
     </div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
@@ -310,7 +314,6 @@ function onToken(resp){
     return;
   }
   TOKEN=resp.access_token;
-  try { var _bc=new BroadcastChannel('vdc_oauth');_bc.postMessage({vdc_token:resp.access_token,vdc_exp:Date.now()+(resp.expires_in||3600)*1000});_bc.close(); } catch(e){}
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo(); loadDates();
@@ -453,6 +456,102 @@ function modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal){
         else { ws[cellAddr]={t:'s',v:newVal}; }
         var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
         resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      }catch(err){reject(err);}
+    };
+    reader.onerror=reject; reader.readAsArrayBuffer(blob);
+  });
+}
+
+// ── AGGIUNGI RIGA (Dettagli Carico / ODP) ─────
+function addRow(sheetName, docNum){
+  if(!adminMode) return;
+  var fileId=currentFileIds[docNum];
+  if(!fileId){ showToast('✗ FileId non trovato'); return; }
+
+  // Trova tutte le righe del DocNum in quella sheet e calcola LineNum progressivo
+  var sheetRows=currentData[sheetName].rows;
+  var groupRows=sheetRows.filter(function(r){ return norm(r[0])===docNum; });
+  if(!groupRows.length){ showToast('✗ Gruppo DocNum non trovato'); return; }
+
+  // LineNum è col B = indice 1. Trova il massimo e incrementa
+  var maxLine=0;
+  groupRows.forEach(function(r){
+    var ln=parseInt(String(r[1]||'0').trim(),10);
+    if(!isNaN(ln)&&ln>maxLine) maxLine=ln;
+  });
+  var newLineNum=maxLine+1;
+
+  // Trova il __fileRowIdx dell'ultima riga del gruppo per inserire dopo
+  var lastRow=groupRows[groupRows.length-1];
+  var insertAfterFileRowIdx=lastRow.__fileRowIdx;
+
+  // Nuova riga: DocNum + LineNum, resto vuoto
+  var nc=Math.max.apply(null,sheetRows.map(function(r){return r.length;}));
+  var newRow=[];
+  for(var i=0;i<nc;i++) newRow.push('');
+  newRow[0]=docNum;
+  newRow[1]=String(newLineNum);
+  newRow.__fileRowIdx=insertAfterFileRowIdx+1; // sarà la riga subito dopo
+
+  setAwbSt('loading','⏳ Aggiunta riga...');
+  downloadFile(fileId)
+  .then(function(blob){ return addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow); })
+  .then(function(result){
+    return uploadFile(fileId, result.blob, '').then(function(){
+      // Aggiorna __fileRowIdx per le righe successive in tutte le sheet
+      // (hanno tutte __fileRowIdx > insertAfterFileRowIdx nello stesso file)
+      SHEET_NAMES.forEach(function(sn){
+        currentData[sn].rows.forEach(function(r){
+          if(currentFileIds[norm(r[0])]===fileId && r.__fileRowIdx>insertAfterFileRowIdx){
+            r.__fileRowIdx++;
+          }
+        });
+      });
+      // Inserisci la nuova riga in memoria in fondo al gruppo
+      var insertIdx=sheetRows.indexOf(lastRow)+1;
+      sheetRows.splice(insertIdx,0,newRow);
+      renderAll(currentData);
+      setAwbSt('ok','✓ Riga aggiunta (LineNum '+newLineNum+')');
+      setTimeout(function(){ setAwbSt('',''); },2000);
+    });
+  })
+  .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+}
+
+function addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+        var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sheetName.trim().toLowerCase();});
+        if(!rn) throw new Error('Sheet '+sheetName+' non trovato');
+        var ws=wb.Sheets[rn];
+        var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+        var insertAt=insertAfterFileRowIdx+1; // indice dove inserire (0-based)
+
+        // Sposta tutte le righe da insertAt in giù di una posizione
+        for(var r=range.e.r;r>=insertAt;r--){
+          for(var c=0;c<=range.e.c;c++){
+            var from=XLSX.utils.encode_cell({r:r,c:c});
+            var to=XLSX.utils.encode_cell({r:r+1,c:c});
+            if(ws[from]){ ws[to]=ws[from]; delete ws[from]; }
+            else delete ws[to];
+          }
+        }
+        // Scrivi la nuova riga
+        for(var c=0;c<newRow.length;c++){
+          if(newRow[c]===''||newRow[c]===undefined||newRow[c]==='__fileRowIdx') continue;
+          if(c==='__fileRowIdx') continue;
+          var val=newRow[c];
+          if(val!==''&&val!==undefined){
+            ws[XLSX.utils.encode_cell({r:insertAt,c:c})]={t:'s',v:String(val)};
+          }
+        }
+        range.e.r++;
+        ws['!ref']=XLSX.utils.encode_range(range);
+        var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+        resolve({blob:new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})});
       }catch(err){reject(err);}
     };
     reader.onerror=reject; reader.readAsArrayBuffer(blob);
@@ -1034,6 +1133,16 @@ function renderTable(sd,isInt,sheetName){
       }
     }
     h+='</tr>';
+    // In admin mode, aggiungi pulsante ➕ alla fine di ogni gruppo DocNum (solo Carico/ODP)
+    if(adminMode&&!isInt){
+      var isLastInGroup=(ri===rows.length-1)||norm(rows[ri+1][0])!==dn;
+      if(isLastInGroup){
+        h+='<tr class="tr-add">';
+        h+='<td class="td-del"><button class="btn-add-row" onclick="addRow(\''+sheetName+'\',\''+dn+'\')" title="Aggiungi riga">➕</button></td>';
+        h+='<td colspan="'+nc+'" style="font-size:11px;color:var(--muted);padding-left:8px">+ aggiungi riga per '+esc(dn)+'</td>';
+        h+='</tr>';
+      }
+    }
   });
   h+='</tbody></table></div>'; return h;
 }
