@@ -669,14 +669,30 @@ function deleteDocNum(rowIdx){
       setAwbSt('loading','⏳ Eliminazione spedizione...');
       downloadFile(fileId)
       .then(function(blob){ return deleteDocNumInBlob(blob, docNum); })
-      .then(function(nb){ return uploadFile(fileId, nb, ''); })
-      .then(function(){
-        SHEET_NAMES.forEach(function(sn){
-          currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
-        });
-        renderAll(currentData);
-        setAwbSt('ok','✓ Spedizione eliminata');
-        setTimeout(function(){ setAwbSt('',''); },2000);
+      .then(function(result){
+        if(result.isEmpty){
+          // File vuoto → elimina da Drive
+          return trashFile(fileId).then(function(){
+            // Rimuovi fileId dalla mappa
+            Object.keys(currentFileIds).forEach(function(k){ if(currentFileIds[k]===fileId) delete currentFileIds[k]; });
+            SHEET_NAMES.forEach(function(sn){
+              currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
+            });
+            renderAll(currentData);
+            setAwbSt('ok','✓ Spedizione eliminata — file vuoto rimosso da Drive');
+            setTimeout(function(){ setAwbSt('',''); },3000);
+          });
+        } else {
+          // File ha ancora dati → salva
+          return uploadFile(fileId, result.blob, '').then(function(){
+            SHEET_NAMES.forEach(function(sn){
+              currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
+            });
+            renderAll(currentData);
+            setAwbSt('ok','✓ Spedizione eliminata');
+            setTimeout(function(){ setAwbSt('',''); },2000);
+          });
+        }
       })
       .catch(function(e){ setAwbSt('err','✗ '+e.message); });
     }
@@ -718,18 +734,17 @@ function deleteDocNumInBlob(blob, docNum){
     reader.onload=function(e){
       try{
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+        var totalRowsLeft=0;
         SHEET_NAMES.forEach(function(sn){
           var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sn.trim().toLowerCase();});
           if(!rn) return;
           var ws=wb.Sheets[rn];
           var range=XLSX.utils.decode_range(ws['!ref']||'A1');
-          // Trova tutte le righe con questo DocNum e rimuovile dal basso verso l'alto
           var toDelete=[];
           for(var r=2;r<=range.e.r;r++){
             var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
             if(ca&&norm(ca.v)===docNum) toDelete.push(r);
           }
-          // Elimina dal basso per non alterare gli indici
           toDelete.reverse().forEach(function(ri){
             for(var rr=ri;rr<range.e.r;rr++){
               for(var c=0;c<=range.e.c;c++){
@@ -742,12 +757,24 @@ function deleteDocNumInBlob(blob, docNum){
             range.e.r--;
           });
           ws['!ref']=XLSX.utils.encode_range(range);
+          // Conta righe dati rimaste (oltre le 2 di intestazione)
+          if(sn==='Intestazione') totalRowsLeft=Math.max(0, range.e.r-1);
         });
-        resolve(new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+        var blob2=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        resolve({blob:blob2, isEmpty:totalRowsLeft===0});
       }catch(err){reject(err);}
     };
     reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
+}
+
+// Elimina file da Drive (lo manda nel cestino)
+function trashFile(fileId){
+  return fetch('https://www.googleapis.com/drive/v3/files/'+fileId,{
+    method:'PATCH',
+    headers:{Authorization:'Bearer '+TOKEN,'Content-Type':'application/json'},
+    body:JSON.stringify({trashed:true})
+  }).then(function(r){ if(!r.ok) return r.text().then(function(t){throw new Error('Trash: '+t);}); return r.json(); });
 }
 
 // ── COPY MODE ─────────────────────────────────
