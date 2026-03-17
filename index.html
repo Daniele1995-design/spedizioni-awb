@@ -314,6 +314,12 @@ function onToken(resp){
     return;
   }
   TOKEN=resp.access_token;
+  // Rinnova automaticamente il token dopo 50 minuti (scade a 60)
+  clearTimeout(window._tokenRefreshTimer);
+  window._tokenRefreshTimer=setTimeout(function(){
+    var saved=getSavedSession();
+    tokenClient.requestAccessToken({prompt:'',login_hint:saved?saved.email||'':''});
+  }, 50*60*1000);
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo(); loadDates();
