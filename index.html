@@ -288,6 +288,7 @@ function onToken(resp){
     exp: Date.now() + (resp.expires_in || 3600) * 1000,
     ts: Date.now()
 }));
+  if (window.opener) window.opener.postMessage({ vdc_token: resp.access_token, vdc_exp: Date.now() + (resp.expires_in || 3600) * 1000 }, '*');
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='flex';
   loadUserInfo(); loadDates();
