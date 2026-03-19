@@ -167,14 +167,16 @@ select.fc option{background:var(--card)}
 .filter-info{margin-left:auto;font-size:11px;color:var(--muted);align-self:flex-end;font-family:var(--ff-mono)}
 #copyToast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#021a10;font-family:var(--ff-mono);font-size:12px;font-weight:700;padding:9px 18px;border-radius:6px;opacity:0;transform:translateY(10px);transition:opacity .18s,transform .18s;pointer-events:none;z-index:9999;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #copyToast.show{opacity:1;transform:translateY(0)}
-.scroll-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.fixed-area{flex-shrink:0;padding:16px 24px 0;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:auto;padding:0 24px 20px;display:flex;flex-direction:column}
+.stats{padding-top:4px;padding-bottom:6px}
 .stats{display:flex;gap:12px;flex-wrap:wrap}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:120px}
 .sl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .sv{font-family:var(--ff-mono);font-size:24px;font-weight:500;color:var(--text)}
 .sv.amber{color:var(--amber)}
 .sv.small{font-size:18px}
-.tabs{display:flex;align-items:flex-end;border-bottom:1px solid var(--border);gap:2px}
+.tabs{display:flex;align-items:flex-end;border-bottom:1px solid var(--border);gap:2px;margin-top:4px}
 .col-mgr-btn{background:none;border:1px solid transparent;border-radius:5px;padding:4px 7px;font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;transition:all .15s;margin-bottom:2px;line-height:1}
 .col-mgr-btn:hover{border-color:var(--blue);color:var(--blue)}
 .col-mgr-btn.has-hidden{color:var(--amber)}
@@ -184,7 +186,20 @@ select.fc option{background:var(--card)}
 .tcnt{display:inline-block;background:var(--border);color:var(--muted);font-family:var(--ff-mono);font-size:10px;padding:1px 6px;border-radius:8px;margin-left:5px;vertical-align:middle}
 .tab.on .tcnt{background:var(--amber-dim);color:var(--amber)}
 .tab-panel{display:none}.tab-panel.on{display:block}
-.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-top:12px}
+.tbl-wrap{border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-top:0}
+.tbl-inner{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+.tbl-wrap thead tr:first-child{display:none}
+thead th{background:var(--card)}
+/* thead fisso separato */
+.thead-fixed{overflow:hidden;background:var(--card);border:1px solid var(--border);border-bottom:2px solid var(--border);border-radius:8px 8px 0 0;flex-shrink:0;display:block}
+.thead-fixed .tbl-inner{overflow-x:hidden}
+.thead-fixed table{border-collapse:collapse;width:100%}
+.thead-fixed th{font-family:var(--ff-cond);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--subtle);padding:6px 11px;border-right:1px solid var(--border);white-space:nowrap}
+.thead-fixed th:last-child{border-right:none}
+.tbl-wrap{border-radius:0 0 8px 8px;border-top:none}
+.tbl-wrap .tbl-inner{overflow-x:auto}
+.tbl-wrap table{border-collapse:collapse;width:100%}
 /* ── COLUMN MANAGER ── */
 .col-mgr-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 0;gap:8px}
 .col-mgr-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:11px;font-family:var(--ff-cond);font-weight:700;letter-spacing:.5px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
@@ -232,6 +247,21 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
 .prog-wrap{width:200px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-bar{height:100%;background:var(--amber);border-radius:2px;transition:width .4s}
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.btn-print{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end}
+.btn-print:hover{border-color:#a855f7;color:#a855f7}
+.btn-print:disabled{opacity:.3;cursor:not-allowed}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{position:fixed;top:0;left:0;width:100%;background:#fff;color:#000}
+  .print-section{margin-bottom:20px;page-break-inside:avoid}
+  .print-title{font-size:13px;font-weight:700;margin-bottom:6px;padding:4px 8px;background:#f0f0f0;border-radius:4px}
+  .print-table{width:100%;border-collapse:collapse;font-size:10px}
+  .print-table th{background:#e8e8e8;padding:4px 6px;text-align:left;border:1px solid #ccc;font-weight:600;font-size:9px}
+  .print-table td{padding:3px 6px;border:1px solid #ddd}
+  .print-table tr:nth-child(even) td{background:#f9f9f9}
+  .print-group-header{background:#d0e8ff;font-weight:600;font-size:9px;padding:3px 6px}
+}
 </style>
 </head>
 <body>
@@ -303,6 +333,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dal file">↻ Aggiorna</button>
     <button class="btn-download" id="btnDownload" onclick="downloadFiltered()" disabled title="Scarica Excel filtrato">⬇ Scarica Excel</button>
+    <button class="btn-print" id="btnPrint" onclick="printFiltered()" disabled title="Stampa spedizioni">🖨 Stampa</button>
     <!-- TASTO ODP SMART COPY -->
     <button class="btn-odp-copy" id="btnOdpCopy" onclick="openOdpModal()" disabled title="Copia ODP in modo intelligente">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="1" width="9" height="11" rx="1.5"/><rect x="2" y="4" width="9" height="11" rx="1.5" fill="var(--surface)" stroke-width="1.5"/></svg>
@@ -315,15 +346,21 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <div class="filter-info" id="fInfo">Seleziona data → Carica</div>
   </div>
 
-  <div class="scroll-area">
+  <!-- Area fissa: stats + tabs -->
+  <div class="fixed-area">
     <div id="statsBar" style="display:none" class="stats">
       <div class="stat"><div class="sl">Spedizioni</div><div class="sv" id="sDoc">—</div></div>
       <div class="stat"><div class="sl">Det. Carico</div><div class="sv" id="sCar">—</div></div>
       <div class="stat"><div class="sl">Righe ODP</div><div class="sv" id="sOdp">—</div></div>
       <div class="stat"><div class="sl">Con AWB</div><div class="sv amber" id="sAwb">—</div></div>
-      <div class="stat"><div class="sl">Totale Colli</div><div class="sv small" id="sColli">—</div></div>
-      <div class="stat"><div class="sl">Totale Peso (kg)</div><div class="sv small" id="sPeso">—</div></div>
+      <div class="stat"><div class="sl">Tot.Colli</div><div class="sv" id="sColli">—</div></div>
+      <div class="stat"><div class="sl">Tot.Peso (kg)</div><div class="sv" id="sPeso">—</div></div>
     </div>
+    <div id="tabBar"></div>
+    <div id="theadBar"></div>
+  </div>
+  <!-- Area scrollabile: solo corpo tabella -->
+  <div class="scroll-area">
     <div id="content">
       <div class="state"><div class="state-ico">📦</div><div class="state-title">Nessun dato caricato</div><div>Seleziona una data e premi <strong>Carica Dati</strong></div></div>
     </div>
@@ -396,6 +433,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
 </div>
 
 <div id="copyToast">✓ Copiato!</div>
+<div id="printArea" style="display:none"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
@@ -996,6 +1034,7 @@ function loadData(){
     document.getElementById('btnRefresh').disabled=false;
     document.getElementById('btnDownload').disabled=false;
     document.getElementById('btnOdpCopy').disabled=false;
+    document.getElementById('btnPrint').disabled=false;
   })
   .catch(function(e){ setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>'); });
 }
@@ -1189,6 +1228,7 @@ function renderAll(sheets){
   document.getElementById('sPeso').textContent=fmtNum(totals.peso);
   document.getElementById('statsBar').style.display='flex';
   document.getElementById('btnOdpCopy').disabled=false;
+  document.getElementById('btnPrint').disabled=false;
 
   var dateTo=document.getElementById('fDateTo').value||currentDate;
   var rangeLabel=currentDate===dateTo
@@ -1196,15 +1236,34 @@ function renderAll(sheets){
     : currentDate.substr(6,2)+'/'+currentDate.substr(4,2)+'/'+currentDate.substr(0,4)+' → '+dateTo.substr(6,2)+'/'+dateTo.substr(4,2)+'/'+dateTo.substr(0,4);
   document.getElementById('fInfo').textContent=rangeLabel+' · '+int.rows.length+' spedizioni';
 
-  var h='<div class="tabs">';
-  h+=tabBtn('ti','Intestazione',int.rows.length,true);
-  h+=tabBtn('tc','Dettagli Carico',car.rows.length,false);
-  h+=tabBtn('to','Dettagli ODP',odp.rows.length,false);
-  h+='</div>';
-  h+='<div id="ti" class="tab-panel on">'+renderTable(int,true,'Intestazione')+'</div>';
-  h+='<div id="tc" class="tab-panel">'+renderTable(car,false,'Dettagli Carico')+'</div>';
-  h+='<div id="to" class="tab-panel">'+renderTable(odp,false,'Dettagli ODP')+'</div>';
+  // Tabs fissi nel tabBar
+  var tabs='<div class="tabs">';
+  tabs+=tabBtn('ti','Intestazione',int.rows.length,true);
+  tabs+=tabBtn('tc','Dettagli Carico',car.rows.length,false);
+  tabs+=tabBtn('to','Dettagli ODP',odp.rows.length,false);
+  tabs+='</div>';
+  document.getElementById('tabBar').innerHTML=tabs;
+
+  // Render tabelle — restituisce {thead, body}
+  var ri=renderTable(int,true,'Intestazione');
+  var rc=renderTable(car,false,'Dettagli Carico');
+  var ro=renderTable(odp,false,'Dettagli ODP');
+
+  // thead fisso nel theadBar (mostra solo quello del tab attivo)
+  var theadContent=ri.thead+rc.thead+ro.thead;
+  document.getElementById('theadBar').innerHTML=theadContent;
+  // Mostra solo thead-0 (Intestazione attivo di default)
+  [0,1,2].forEach(function(idx){
+    var el=document.getElementById('thead-'+idx);
+    if(el){ el.style.display=idx===0?'block':'none'; }
+  });
+
+  // Corpo scrollabile
+  var h='<div id="ti" class="tab-panel on">'+ri.body+'</div>';
+  h+='<div id="tc" class="tab-panel">'+rc.body+'</div>';
+  h+='<div id="to" class="tab-panel">'+ro.body+'</div>';
   setContent(h);
+  syncTableScroll();
 }
 function tabBtn(id,label,cnt,on){
   var sn={ti:'Intestazione',tc:'Dettagli Carico',to:'Dettagli ODP'}[id];
@@ -1217,38 +1276,72 @@ function switchTab(id){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
   document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
   document.getElementById(id).classList.add('on');
-  document.querySelectorAll('.tab')[{ti:0,tc:1,to:2}[id]].classList.add('on');
+  document.querySelectorAll('#tabBar .tab')[{ti:0,tc:1,to:2}[id]].classList.add('on');
+  // Mostra thead corretto
+  var idxMap={ti:0,tc:1,to:2};
+  [0,1,2].forEach(function(idx){
+    var el=document.getElementById('thead-'+idx);
+    if(el) el.style.display=(idx===idxMap[id])?'':'none';
+  });
+  // Sincronizza scroll orizzontale
+  syncTableScroll();
+  // Torna in cima
+  var sa=document.querySelector('.scroll-area');
+  if(sa) sa.scrollTop=0;
+}
+
+// Sincronizza scroll orizzontale tra thead fisso e tbody scrollabile
+function syncTableScroll(){
+  document.querySelectorAll('.tab-panel.on .tbl-inner').forEach(function(bodyScroll){
+    var sn=bodyScroll.closest('.tab-panel').id;
+    var snIdx={ti:0,tc:1,to:2}[sn];
+    var headScroll=document.querySelector('#thead-'+snIdx+' .tbl-inner');
+    if(!headScroll) return;
+    // Rimuovi vecchi listener rimpiazzando il nodo
+    var fresh=bodyScroll.cloneNode(true);
+    bodyScroll.parentNode.replaceChild(fresh,bodyScroll);
+    fresh.addEventListener('scroll',function(){ headScroll.scrollLeft=fresh.scrollLeft; });
+  });
 }
 function renderTable(sd,isInt,sheetName){
   var hdr=sd.headers||[],rows=sd.rows||[];
-  if(!rows.length)return '<div class="state"><div class="state-ico">🔍</div><div class="state-title">Nessun dato</div><div>Nessuna riga trovata con i filtri selezionati.</div></div>';
+  if(!rows.length)return {thead:'',body:'<div class="state"><div class="state-ico">🔍</div><div class="state-title">Nessun dato</div><div>Nessuna riga trovata con i filtri selezionati.</div></div>'};
   var nc=Math.max(hdr.length>0?hdr[0].length:0,rows.length>0?rows[0].length:0);
   var destiMap={};
   if(!isInt&&currentData&&currentData['Intestazione']){
     currentData['Intestazione'].rows.forEach(function(r){ destiMap[norm(r[0])]=String(r[8]||'').trim(); });
   }
   var showDest=!isInt;
-  // Colonne nascoste (incluso -1 per colonna DESTINO extra)
   var hiddenSet={};
   getHiddenCols(sheetName).forEach(function(ci){ hiddenSet[ci]=true; });
   function hcls(c){ return hiddenSet[c]?' col-hidden':''; }
   var destHidden=showDest&&(hiddenSet[-1]||false);
-  var h='<div class="tbl-wrap"><table><thead>';
-  if(hdr[0]){
-    h+='<tr>';
-    if(adminMode) h+='<th></th>';
-    if(showDest) h+='<th'+(destHidden?' class="col-hidden"':'')+' style="color:var(--amber);opacity:.6;font-size:9px">U_DEST</th>';
-    for(var c=0;c<nc;c++) h+='<th'+(hcls(c)?' class="col-hidden"':'')+'>'+esc(hdr[0][c]||'')+'</th>';
-    h+='</tr>';
+
+  // Indice sheet per ID
+  var snIdx={'Intestazione':0,'Dettagli Carico':1,'Dettagli ODP':2}[sheetName]||0;
+
+  // Costruisce riga th (solo riga 2 — riga 1 nascosta)
+  function buildThRow(){
+    var hdrRow=hdr[1]||hdr[0]||[];
+    var r='<tr>';
+    if(adminMode) r+='<th></th>';
+    if(showDest) r+='<th'+(destHidden?' class="col-hidden"':'')+' style="color:var(--amber);font-size:11px;font-weight:600">DESTINO</th>';
+    for(var c=0;c<nc;c++) r+='<th'+(hcls(c)?' class="col-hidden"':'')+'>'+esc(hdrRow[c]||'')+'</th>';
+    r+='</tr>';
+    return r;
   }
-  if(hdr[1]){
-    h+='<tr>';
-    if(adminMode) h+='<th></th>';
-    if(showDest) h+='<th'+(destHidden?' class="col-hidden"':'')+' style="color:var(--amber);font-size:11px;font-weight:600">DESTINO</th>';
-    for(var c=0;c<nc;c++) h+='<th'+(hcls(c)?' class="col-hidden"':'')+'>'+esc(hdr[1][c]||'')+'</th>';
-    h+='</tr>';
-  }
-  h+='</thead><tbody>';
+
+  // ── THEAD fisso (va nel theadBar) ──
+  var thead='<div class="thead-fixed" id="thead-'+snIdx+'"><div class="tbl-inner"><table><thead>';
+  thead+=buildThRow();
+  thead+='</thead></table></div></div>';
+
+  // ── TBODY scrollabile ──
+  var h='<div class="tbl-wrap"><div class="tbl-inner"><table>';
+  h+='<thead style="visibility:hidden;pointer-events:none;line-height:0;font-size:0">';
+  h+=buildThRow();
+  h+='</thead>';
+  h+='<tbody>';
   rows.forEach(function(row,ri){
     var dn=norm(row[0]); h+='<tr>';
     if(adminMode){
@@ -1291,7 +1384,8 @@ function renderTable(sd,isInt,sheetName){
       }
     }
   });
-  h+='</tbody></table></div>'; return h;
+  h+='</tbody></table></div></div>';
+  return {thead:thead, body:h};
 }
 
 
@@ -1776,7 +1870,7 @@ function closeColMgr(){
 function updateTabBadges(){
   if(!currentData) return;
   var map={ti:'Intestazione',tc:'Dettagli Carico',to:'Dettagli ODP'};
-  document.querySelectorAll('.tab').forEach(function(btn){
+  document.querySelectorAll('#tabBar .tab').forEach(function(btn){
     // Trova id del panel corrispondente
     var onclick=btn.getAttribute('onclick')||'';
     var m=onclick.match(/switchTab\('(\w+)'\)/);
@@ -1813,6 +1907,122 @@ document.addEventListener('click',function(e){
   if(e.target.id==='colMgrOverlay') closeColMgr();
 });
 
+// ── STAMPA ───────────────────────────────────
+function printFiltered(){
+  if(!currentData) return;
+  var intRows=currentData['Intestazione'].rows||[];
+  var carRows=currentData['Dettagli Carico'].rows||[];
+  var odpRows=currentData['Dettagli ODP'].rows||[];
+  var carHdr=(currentData['Dettagli Carico'].headers||[])[1]||(currentData['Dettagli Carico'].headers||[])[0]||[];
+  var odpHdr=(currentData['Dettagli ODP'].headers||[])[1]||(currentData['Dettagli ODP'].headers||[])[0]||[];
+
+  // Mappa DocNum → dati intestazione
+  var intMap={};
+  intRows.forEach(function(r){ intMap[norm(r[0])]=r; });
+
+  // Raggruppa Dettagli Carico per DocNum
+  var carByDoc={};
+  carRows.forEach(function(r){
+    var dn=norm(r[0]);
+    if(!carByDoc[dn]) carByDoc[dn]=[];
+    carByDoc[dn].push(r);
+  });
+
+  // Raggruppa Dettagli ODP per DocNum
+  var odpByDoc={};
+  odpRows.forEach(function(r){
+    var dn=norm(r[0]);
+    if(!odpByDoc[dn]) odpByDoc[dn]=[];
+    odpByDoc[dn].push(r);
+  });
+
+  // Colonne da mostrare per Det.Carico (escludi DocNum col0, LineNum col1)
+  var carCols=[];
+  for(var i=2;i<carHdr.length;i++) if(carHdr[i]) carCols.push(i);
+
+  // Colonne da mostrare per Det.ODP (escludi DocNum col0, LineNum col1)
+  var odpCols=[];
+  for(var i=2;i<odpHdr.length;i++) if(odpHdr[i]) odpCols.push(i);
+
+  var html='<style>body{font-family:Arial,sans-serif;font-size:10px;color:#000}'+
+    '.print-section{margin-bottom:16px;border:1px solid #ccc;border-radius:4px;overflow:hidden}'+
+    '.print-header{background:#1a2236;color:#fff;padding:6px 10px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}'+
+    '.print-header span{font-size:10px}.print-header strong{font-size:11px;color:#f59e0b}'+
+    '.print-header .awb-val{color:#10b981;font-weight:700}'+
+    '.print-sub{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;'+
+    'background:#e8edf5;padding:3px 10px;border-bottom:1px solid #ccc}'+
+    'table{width:100%;border-collapse:collapse;font-size:9px}'+
+    'th{background:#eef2f7;padding:3px 6px;text-align:left;border:1px solid #ccc;font-weight:600}'+
+    'td{padding:3px 6px;border:1px solid #e0e0e0}'+
+    'tr:nth-child(even) td{background:#f7f9fc}'+
+    '.no-data{padding:6px 10px;color:#999;font-style:italic;font-size:9px}'+
+    '@media print{@page{margin:10mm}}</style>';
+
+  // Una sezione per ogni DocNum
+  intRows.forEach(function(ir){
+    var dn=norm(ir[0]);
+    var awb=String(ir[3]||'').trim();
+    var destino=String(ir[8]||'').trim();
+    var tipo=String(ir[6]||'').trim();
+    var data=String(ir[1]||'').trim();
+    var bp=String(ir[2]||'').trim();
+    if(/^\d{8}$/.test(data)) data=data.substr(6,2)+'/'+data.substr(4,2)+'/'+data.substr(0,4);
+
+    html+='<div class="print-section">';
+    // Header spedizione
+    html+='<div class="print-header">';
+    html+='<strong>'+esc(dn)+'</strong>';
+    html+='<span>'+esc(bp)+'</span>';
+    html+='<span>'+esc(data)+'</span>';
+    html+='<span>'+esc(tipo)+'</span>';
+    html+='<span>'+esc(destino)+'</span>';
+    html+='<span class="awb-val">'+(awb?awb:'— no AWB —')+'</span>';
+    html+='</div>';
+
+    // Dettagli Carico
+    var cars=carByDoc[dn]||[];
+    if(cars.length){
+      html+='<div class="print-sub">Dettagli Carico ('+cars.length+')</div>';
+      html+='<table><tr>';
+      carCols.forEach(function(ci){ html+='<th>'+esc(carHdr[ci]||'')+'</th>'; });
+      html+='</tr>';
+      cars.forEach(function(row){
+        html+='<tr>';
+        carCols.forEach(function(ci){ html+='<td>'+esc(String(row[ci]===null||row[ci]===undefined?'':row[ci]))+'</td>'; });
+        html+='</tr>';
+      });
+      html+='</table>';
+    }
+
+    // Dettagli ODP
+    var odps=odpByDoc[dn]||[];
+    if(odps.length){
+      html+='<div class="print-sub">Dettagli ODP ('+odps.length+')</div>';
+      html+='<table><tr>';
+      odpCols.forEach(function(ci){ html+='<th>'+esc(odpHdr[ci]||'')+'</th>'; });
+      html+='</tr>';
+      odps.forEach(function(row){
+        html+='<tr>';
+        odpCols.forEach(function(ci){ html+='<td>'+esc(String(row[ci]===null||row[ci]===undefined?'':row[ci]))+'</td>'; });
+        html+='</tr>';
+      });
+      html+='</table>';
+    }
+
+    if(!cars.length&&!odps.length) html+='<div class="no-data">Nessun dettaglio disponibile</div>';
+    html+='</div>';
+  });
+
+  // Apri in finestra popup e stampa
+  var win=window.open('','_blank','width=900,height=700');
+  win.document.write('<!DOCTYPE html><html><head><title>Spedizioni '+
+    (currentDate?currentDate.substr(6,2)+'/'+currentDate.substr(4,2)+'/'+currentDate.substr(0,4):'')+
+    '</title></head><body>'+html+'</body></html>');
+  win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); },600);
+}
+
 // ── DRIVE API ─────────────────────────────────
 function listFiles(q){ return gFetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name)&pageSize=200').then(function(r){return r.files||[];}); }
 function downloadFile(id){ return fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){if(!r.ok)throw new Error('Download fallito: '+r.status);return r.blob();}); }
@@ -1831,7 +2041,9 @@ function gFetch(url){
 }
 
 // ── UTILITY ───────────────────────────────────
-function setContent(h){document.getElementById('content').innerHTML=h;}
+function setContent(h){
+  document.getElementById('content').innerHTML=h;
+}
 function setAwbSt(type,msg){var el=document.getElementById('awbStatus');el.className='awb-status'+(type?' '+type:'');el.textContent=msg;}
 function spinnerHtml(msg,pct){return '<div class="state"><div class="spinner"></div><div class="state-title">'+esc(msg)+'</div><div class="prog-wrap"><div class="prog-bar" style="width:'+(pct||10)+'%"></div></div></div>';}
 function norm(v){if(v===null||v===undefined)return'';var s=String(v).trim();if(/^\d+\.0+$/.test(s))s=s.replace(/\.0+$/,'');return s;}
