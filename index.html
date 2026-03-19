@@ -168,7 +168,7 @@ select.fc option{background:var(--card)}
 #copyToast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#021a10;font-family:var(--ff-mono);font-size:12px;font-weight:700;padding:9px 18px;border-radius:6px;opacity:0;transform:translateY(10px);transition:opacity .18s,transform .18s;pointer-events:none;z-index:9999;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #copyToast.show{opacity:1;transform:translateY(0)}
 .fixed-area{flex-shrink:0;padding:16px 24px 0;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
-.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 24px 20px;display:flex;flex-direction:column}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:auto;padding:0 24px 20px;display:flex;flex-direction:column}
 .stats{padding-top:4px;padding-bottom:6px}
 .stats{display:flex;gap:12px;flex-wrap:wrap}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:120px}
@@ -196,10 +196,10 @@ thead th{background:var(--card)}
 thead tr:first-child{display:none}
 thead th{position:sticky;top:0;z-index:10;background:var(--card);box-shadow:0 2px 0 var(--border)}
 /* thead fisso separato */
-.tbl-outer{overflow-x:auto;margin-top:8px;border-radius:8px;border:1px solid var(--border)}
-.tbl-outer table{border-collapse:collapse;white-space:nowrap;width:100%}
+.tbl-outer{margin-top:8px;border-radius:8px;border:1px solid var(--border)}
+.tbl-outer table{border-collapse:collapse;white-space:nowrap;width:max-content;min-width:100%}
 thead tr:first-child{display:none}
-thead th{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:2px solid var(--border);padding:6px 11px;font-family:var(--ff-cond);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--subtle);white-space:nowrap;border-right:1px solid var(--border)}
+thead th{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:2px solid var(--border);padding:6px 11px;font-family:var(--ff-cond);font-size:14px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--subtle);white-space:nowrap;border-right:1px solid var(--border)}
 thead th:last-child{border-right:none}
 /* ── COLUMN MANAGER ── */
 .col-mgr-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 0;gap:8px}
@@ -225,7 +225,7 @@ thead th:last-child{border-right:none}
 .col-mgr-close:hover{background:#2563eb}
 .col-mgr-hidden-note{font-size:10px;color:var(--muted);font-family:var(--ff-mono)}
 th.col-hidden,td.col-hidden{display:none}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
 thead tr{background:var(--card);border-bottom:1px solid var(--border)}
 thead tr:first-child th{font-family:var(--ff-mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:7px 11px 3px;border-right:1px solid var(--border);white-space:nowrap;user-select:none}
 thead tr:last-child th{font-family:var(--ff-cond);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--subtle);padding:3px 11px 8px;border-right:1px solid var(--border);white-space:nowrap;user-select:none}
@@ -233,7 +233,7 @@ thead th:last-child{border-right:none!important}
 tbody tr{border-bottom:1px solid rgba(36,48,72,.7);transition:background .1s}
 tbody tr:hover{background:rgba(255,255,255,.025)}
 tbody tr:last-child{border-bottom:none}
-td{padding:8px 11px;border-right:1px solid rgba(36,48,72,.5);white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:default}
+td{padding:8px 11px;border-right:1px solid rgba(36,48,72,.5);white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;user-select:text;cursor:default;font-size:14.5px}
 td:last-child{border-right:none}
 td.dn{font-family:var(--ff-mono);font-size:11px;color:var(--subtle)}
 td.awb-val{font-family:var(--ff-mono);font-size:11px;font-weight:500;color:var(--amber)}
@@ -354,8 +354,8 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
       <div class="stat"><div class="sl">Det. Carico</div><div class="sv" id="sCar">—</div></div>
       <div class="stat"><div class="sl">Righe ODP</div><div class="sv" id="sOdp">—</div></div>
       <div class="stat"><div class="sl">Con AWB</div><div class="sv amber" id="sAwb">—</div></div>
-      <div class="stat"><div class="sl">Tot.Colli</div><div class="sv" id="sColli">—</div></div>
-      <div class="stat"><div class="sl">Tot.Peso (kg)</div><div class="sv" id="sPeso">—</div></div>
+      <div class="stat"><div class="sl">Totale Colli</div><div class="sv small" id="sColli">—</div></div>
+      <div class="stat"><div class="sl">Totale Peso (kg)</div><div class="sv small" id="sPeso">—</div></div>
     </div>
     <div id="tabBar"></div>
   </div>
