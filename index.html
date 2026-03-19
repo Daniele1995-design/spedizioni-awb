@@ -79,15 +79,58 @@ tr.tr-add td{border-bottom:none;padding:2px 4px;background:rgba(16,185,129,.03)}
 /* CONFIRM MODAL */
 .modal-overlay.confirm .modal{max-width:380px}
 .modal-warn{font-size:13px;color:var(--subtle);line-height:1.6}
-/* DELETE ROW in admin mode */
 .btn-del-row{background:none;border:none;color:var(--border);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all .15s;line-height:1}
 body.admin-mode .btn-del-row{color:var(--muted)}
 body.admin-mode .btn-del-row:hover{background:rgba(239,68,68,.15);color:var(--red)}
-/* CONFIRM MODAL */
 .modal-btn.danger{background:var(--red);color:#fff}
 .modal-btn.danger:hover{background:#dc2626}
-/* DATE INPUT */
 input[type=date].fc{min-width:130px;color-scheme:dark}
+
+/* ── DATE PICKER DROPDOWN ── */
+.date-input-wrap{position:relative;display:flex;align-items:center;gap:0}
+.date-input-wrap .fc{border-radius:6px 0 0 6px;border-right:none;min-width:0;width:126px}
+.btn-date-list{background:var(--card);border:1px solid var(--border);border-radius:0 6px 6px 0;padding:7px 9px;cursor:pointer;color:var(--muted);font-size:13px;line-height:1;transition:all .2s;height:35px;display:flex;align-items:center}
+.btn-date-list:hover{background:var(--border);color:var(--text)}
+.date-dropdown{position:absolute;top:calc(100% + 4px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:500;min-width:180px;max-height:260px;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+.date-dropdown.open{display:block}
+.date-dropdown-item{padding:8px 14px;font-family:var(--ff-mono);font-size:12px;color:var(--subtle);cursor:pointer;transition:background .1s,color .1s;white-space:nowrap}
+.date-dropdown-item:hover{background:var(--amber-glow);color:var(--amber)}
+.date-dropdown-item.active{color:var(--amber);font-weight:500}
+.date-dropdown-header{padding:6px 14px 4px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:2px}
+
+/* ── ODP SMART COPY ── */
+.btn-odp-copy{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--subtle);cursor:pointer;transition:all .2s;align-self:flex-end;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-odp-copy:hover{border-color:var(--green);color:var(--green)}
+.btn-odp-copy:disabled{opacity:.3;cursor:not-allowed}
+.btn-odp-copy svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── ODP MODAL ── */
+.odp-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.odp-modal-overlay.hide{display:none}
+.odp-modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:560px;max-width:95vw;display:flex;flex-direction:column;gap:16px}
+.odp-modal-title{font-family:var(--ff-cond);font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.odp-modal-sub{font-size:11px;color:var(--muted);margin-top:-8px}
+.odp-options{display:flex;gap:10px;flex-wrap:wrap}
+.odp-opt-btn{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-family:var(--ff-cond);font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--subtle);cursor:pointer;transition:all .15s}
+.odp-opt-btn:hover{border-color:var(--blue);color:var(--blue)}
+.odp-opt-btn.sel{border-color:var(--amber);color:var(--amber);background:var(--amber-glow)}
+.odp-stats{font-size:11px;color:var(--muted);font-family:var(--ff-mono)}
+.odp-modal-btns{display:flex;gap:10px;justify-content:flex-end}
+.odp-close-btn{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 18px;font-family:var(--ff-cond);font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s}
+.odp-close-btn:hover{color:var(--text)}
+/* Chunks */
+.odp-chunks{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
+.odp-chunk{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.odp-chunk-num{font-size:10px;font-weight:700;color:var(--muted);font-family:var(--ff-cond);min-width:20px;flex-shrink:0}
+.odp-chunk-text{font-family:var(--ff-mono);font-size:12px;color:var(--amber);flex:1;letter-spacing:.3px;word-break:break-all}
+.odp-chunk-len{font-size:10px;color:var(--muted);font-family:var(--ff-mono);flex-shrink:0;min-width:36px;text-align:right}
+.odp-chunk-copy{background:none;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-family:var(--ff-cond);font-size:11px;font-weight:700;color:var(--subtle);cursor:pointer;transition:all .15s;flex-shrink:0}
+.odp-chunk-copy:hover{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08)}
+.odp-chunk-copy.copied{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.15)}
+.odp-chunk-sep{height:1px;background:var(--border);margin:2px 0}
+.odp-copyall-btn{background:var(--green);color:#021a10;border:none;border-radius:6px;padding:9px 22px;font-family:var(--ff-cond);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.odp-copyall-btn:hover{background:#0d9668}
+
 .awb-panel{background:linear-gradient(135deg,#160f00 0%,#1a1500 50%,#0d1117 100%);border-bottom:2px solid var(--amber-dim);padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;flex-shrink:0}
 .awb-label{font-family:var(--ff-cond);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);flex-shrink:0;display:flex;align-items:center;gap:8px}
 .awb-dot{width:8px;height:8px;background:var(--amber);border-radius:50%;animation:pulse 2s infinite}
@@ -130,6 +173,7 @@ select.fc option{background:var(--card)}
 .sl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .sv{font-family:var(--ff-mono);font-size:24px;font-weight:500;color:var(--text)}
 .sv.amber{color:var(--amber)}
+.sv.small{font-size:18px}
 .tabs{display:flex;border-bottom:1px solid var(--border)}
 .tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 20px;font-family:var(--ff-sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:-1px}
 .tab:hover{color:var(--text)}
@@ -203,15 +247,25 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   </div>
 
   <div class="filters">
+    <!-- DATA DA con dropdown elenco date -->
     <div class="fg">
       <div class="fl">Data</div>
-      <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:0;width:126px" onchange="onDateChange();loadData()">
-      <datalist id="listDates"></datalist>
+      <div class="date-input-wrap" id="dateFromWrap">
+        <input id="fDate" class="fc" type="text" list="listDates" placeholder="GG/MM/AAAA" autocomplete="off" style="min-width:0;width:126px;border-radius:6px 0 0 6px;border-right:none" onchange="onDateChange();loadData()" onclick="closeDateDropdowns()">
+        <datalist id="listDates"></datalist>
+        <button class="btn-date-list" onclick="toggleDateDropdown('ddFrom')" title="Mostra tutte le date">▾</button>
+        <div class="date-dropdown" id="ddFrom"></div>
+      </div>
     </div>
+    <!-- DATA A con dropdown elenco date -->
     <div class="fg">
       <div class="fl">A Data</div>
-      <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:0;width:126px" onchange="currentData&&loadData()">
-      <datalist id="listDatesTo"></datalist>
+      <div class="date-input-wrap" id="dateToWrap">
+        <input id="fDateTo" class="fc" type="text" list="listDatesTo" placeholder="Stessa data" autocomplete="off" style="min-width:0;width:126px;border-radius:6px 0 0 6px;border-right:none" onchange="currentData&&loadData()" onclick="closeDateDropdowns()">
+        <datalist id="listDatesTo"></datalist>
+        <button class="btn-date-list" onclick="toggleDateDropdown('ddTo')" title="Mostra tutte le date">▾</button>
+        <div class="date-dropdown" id="ddTo"></div>
+      </div>
     </div>
     <div class="fg"><div class="fl">Plant</div><select id="fPlant" class="fc" onchange="currentData&&loadData()"><option value="">— Tutti —</option></select></div>
     <div class="fg"><div class="fl">Commessa</div><select id="fCommessa" class="fc" onchange="currentData&&loadData()"><option value="">— Tutte —</option></select></div>
@@ -222,6 +276,11 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <button class="btn-load" id="btnLoad" onclick="loadData()" disabled>Carica Dati</button>
     <button class="btn-refresh" id="btnRefresh" onclick="refreshData()" disabled title="Ricarica dal file">↻ Aggiorna</button>
     <button class="btn-download" id="btnDownload" onclick="downloadFiltered()" disabled title="Scarica Excel filtrato">⬇ Scarica Excel</button>
+    <!-- TASTO ODP SMART COPY -->
+    <button class="btn-odp-copy" id="btnOdpCopy" onclick="openOdpModal()" disabled title="Copia ODP in modo intelligente">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="1" width="9" height="11" rx="1.5"/><rect x="2" y="4" width="9" height="11" rx="1.5" fill="var(--surface)" stroke-width="1.5"/></svg>
+      ODP
+    </button>
     <label id="copyToggleLabel" class="copy-toggle">
       <input type="checkbox" id="copyToggle" onchange="toggleCopyMode(this.checked)">
       Click per copiare
@@ -235,7 +294,8 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
       <div class="stat"><div class="sl">Det. Carico</div><div class="sv" id="sCar">—</div></div>
       <div class="stat"><div class="sl">Righe ODP</div><div class="sv" id="sOdp">—</div></div>
       <div class="stat"><div class="sl">Con AWB</div><div class="sv amber" id="sAwb">—</div></div>
-      <div class="stat"><div class="sl">File mergiati</div><div class="sv" id="sFiles">—</div></div>
+      <div class="stat"><div class="sl">Tot.Colli</div><div class="sv" id="sColli">—</div></div>
+      <div class="stat"><div class="sl">Tot.Peso (kg)</div><div class="sv" id="sPeso">—</div></div>
     </div>
     <div id="content">
       <div class="state"><div class="state-ico">📦</div><div class="state-title">Nessun dato caricato</div><div>Seleziona una data e premi <strong>Carica Dati</strong></div></div>
@@ -243,6 +303,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   </div>
 </div>
 
+<!-- ADMIN MODAL -->
 <div id="adminModal" class="modal-overlay hide">
   <div class="modal">
     <div class="modal-title">🔐 Modalità Admin</div>
@@ -256,6 +317,7 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
   </div>
 </div>
 
+<!-- CONFIRM MODAL -->
 <div id="confirmModal" class="modal-overlay hide confirm">
   <div class="modal">
     <div class="modal-title" id="confirmTitle">Conferma eliminazione</div>
@@ -263,6 +325,27 @@ body.copy-mode td:not(.awb-empty):hover{background:rgba(245,158,11,.1);color:var
     <div class="modal-btns" style="margin-top:8px">
       <button class="modal-btn cancel" onclick="closeConfirm()">Annulla</button>
       <button class="modal-btn ok" style="background:var(--red)" id="confirmOkBtn">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- ODP SMART COPY MODAL -->
+<div id="odpModal" class="odp-modal-overlay hide">
+  <div class="odp-modal">
+    <div class="odp-modal-title">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="var(--green)" stroke-width="1.5"><rect x="5" y="1" width="9" height="11" rx="1.5"/><rect x="2" y="4" width="9" height="11" rx="1.5" fill="var(--surface)" stroke-width="1.5"/></svg>
+      Copia ODP
+    </div>
+    <div class="odp-modal-sub" id="odpModalSub">ODP dalle righe filtrate</div>
+    <div class="odp-options">
+      <button class="odp-opt-btn sel" id="optCompact" onclick="setOdpMode('compact')">Compatto (→ range)</button>
+      <button class="odp-opt-btn"    id="optFull"    onclick="setOdpMode('full')">Solo + (tutti)</button>
+    </div>
+    <div class="odp-stats" id="odpStats"></div>
+    <div class="odp-chunks" id="odpChunks"></div>
+    <div class="odp-modal-btns">
+      <button class="odp-close-btn" onclick="closeOdpModal()">Chiudi</button>
+      <button class="odp-copyall-btn" onclick="copyAllChunks()">📋 Copia tutto</button>
     </div>
   </div>
 </div>
@@ -275,7 +358,7 @@ var CLIENT_ID   = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleuser
 var FOLDER_ID   = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
 var SHEET_NAMES = ['Intestazione','Dettagli Carico','Dettagli ODP'];
 var TOKEN=null, currentData=null, currentDate=null, AWB_MAP={};
-var currentFileIds={}; // mappa DocNum → fileId per il salvataggio AWB
+var currentFileIds={};
 var copyModeOn=false, toastTimer=null;
 
 // ── INIT ──────────────────────────────────────
@@ -287,8 +370,51 @@ window.onload=function(){
     setUserUI(saved.name,saved.email,saved.picture);
   }
   waitGsi();
+  // Chiudi dropdown date cliccando fuori
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('.date-input-wrap')) closeDateDropdowns();
+  });
 };
 
+// ── DATE DROPDOWN ─────────────────────────────
+var availableDates=[];
+
+function buildDateDropdown(ddId, inputId){
+  var dd=document.getElementById(ddId);
+  dd.innerHTML='<div class="date-dropdown-header">Date disponibili</div>';
+  var cur=document.getElementById(inputId).value.trim();
+  availableDates.forEach(function(d){
+    var txt=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
+    var item=document.createElement('div');
+    item.className='date-dropdown-item'+(cur===txt?' active':'');
+    item.textContent=txt;
+    item.addEventListener('mousedown',function(e){
+      e.preventDefault();
+      document.getElementById(inputId).value=txt;
+      closeDateDropdowns();
+      if(inputId==='fDate'){ onDateChange(); }
+      loadData();
+    });
+    dd.appendChild(item);
+  });
+}
+
+function toggleDateDropdown(ddId){
+  var dd=document.getElementById(ddId);
+  var isOpen=dd.classList.contains('open');
+  closeDateDropdowns();
+  if(!isOpen){
+    var inputId=ddId==='ddFrom'?'fDate':'fDateTo';
+    buildDateDropdown(ddId, inputId);
+    dd.classList.add('open');
+  }
+}
+
+function closeDateDropdowns(){
+  document.querySelectorAll('.date-dropdown').forEach(function(d){ d.classList.remove('open'); });
+}
+
+// ── GSI / AUTH ────────────────────────────────
 var tokenClient;
 function waitGsi(){
   if(typeof google==='undefined'){setTimeout(waitGsi,150);return;}
@@ -314,7 +440,6 @@ function onToken(resp){
     return;
   }
   TOKEN=resp.access_token;
-  // Rinnova automaticamente il token dopo 50 minuti (scade a 60)
   clearTimeout(window._tokenRefreshTimer);
   window._tokenRefreshTimer=setTimeout(function(){
     var saved=getSavedSession();
@@ -354,31 +479,25 @@ function makeInitial(str){
   return '<div class="user-avatar-fallback">'+ch.toUpperCase()+'</div>';
 }
 
+// ── ADMIN ─────────────────────────────────────
 var ADMIN_PASS='Ats2026@';
 var adminMode=false;
 
 function toggleAdmin(){
   if(adminMode){ disableAdmin(); return; }
-  // Mostra modal password
   document.getElementById('adminModal').classList.remove('hide');
   document.getElementById('adminPwInput').value='';
   document.getElementById('adminErr').classList.remove('show');
   setTimeout(function(){ document.getElementById('adminPwInput').focus(); },100);
 }
-
-function closeAdminModal(){
-  document.getElementById('adminModal').classList.add('hide');
-}
-
+function closeAdminModal(){ document.getElementById('adminModal').classList.add('hide'); }
 function confirmAdmin(){
   var pw=document.getElementById('adminPwInput').value;
   if(pw===ADMIN_PASS){
-    adminMode=true;
-    closeAdminModal();
+    adminMode=true; closeAdminModal();
     document.getElementById('btnAdmin').classList.add('on');
     document.body.classList.add('admin-mode');
     showToast('🔓 Modalità Admin attiva');
-    // Re-render per aggiungere classe editable alle celle
     if(currentData) renderAll(currentData);
   } else {
     document.getElementById('adminErr').classList.add('show');
@@ -386,7 +505,6 @@ function confirmAdmin(){
     document.getElementById('adminPwInput').focus();
   }
 }
-
 function disableAdmin(){
   adminMode=false;
   document.getElementById('btnAdmin').classList.remove('on');
@@ -394,14 +512,11 @@ function disableAdmin(){
   showToast('🔒 Modalità Admin disattivata');
   if(currentData) renderAll(currentData);
 }
-
-// Chiudi modal cliccando overlay
 document.addEventListener('click',function(e){
   if(e.target.id==='adminModal') closeAdminModal();
 });
 
 // ── EDIT CELLA ADMIN ──────────────────────────
-// sheetName: nome sheet, rowIdx: indice riga in currentData, colIdx: indice colonna
 function startCellEdit(td, sheetName, rowIdx, colIdx){
   if(!adminMode) return;
   if(td.classList.contains('editing')) return;
@@ -409,45 +524,34 @@ function startCellEdit(td, sheetName, rowIdx, colIdx){
   var currentStr=currentVal===null||currentVal===undefined?'':String(currentVal);
   td.classList.add('editing');
   var inp=document.createElement('input');
-  inp.value=currentStr;
-  td.innerHTML=''; td.appendChild(inp);
+  inp.value=currentStr; td.innerHTML=''; td.appendChild(inp);
   inp.focus(); inp.select();
-
   function save(){
-    var newVal=inp.value.trim();
-    td.classList.remove('editing');
-    td.textContent=newVal;
-    if(newVal===currentStr) return; // nessuna modifica
+    var newVal=inp.value.trim(); td.classList.remove('editing'); td.textContent=newVal;
+    if(newVal===currentStr) return;
     currentData[sheetName].rows[rowIdx][colIdx]=newVal;
     saveCellToDrive(sheetName, rowIdx, colIdx, newVal);
   }
-
   inp.addEventListener('blur', save);
   inp.addEventListener('keydown', function(e){
     if(e.key==='Enter'){ e.preventDefault(); inp.blur(); }
     if(e.key==='Escape'){ inp.removeEventListener('blur',save); td.classList.remove('editing'); td.textContent=currentStr; }
   });
 }
-
 function saveCellToDrive(sheetName, rowIdx, colIdx, newVal){
   var row=currentData[sheetName].rows[rowIdx];
   var docNum=norm(row[0]);
-  var fileRowIdx=row.__fileRowIdx; // indice riga esatto nel file xlsx
+  var fileRowIdx=row.__fileRowIdx;
   var fileId=currentFileIds[docNum];
   if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
   if(fileRowIdx===undefined){ showToast('✗ Indice riga non trovato'); return; }
-
   setAwbSt('loading','⏳ Salvataggio cella...');
   downloadFile(fileId)
   .then(function(blob){ return modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal); })
   .then(function(nb){ return uploadFile(fileId, nb, ''); })
-  .then(function(){
-    setAwbSt('ok','✓ Cella salvata');
-    setTimeout(function(){ setAwbSt('',''); }, 2000);
-  })
+  .then(function(){ setAwbSt('ok','✓ Cella salvata'); setTimeout(function(){ setAwbSt('',''); }, 2000); })
   .catch(function(e){ setAwbSt('err','✗ '+e.message); });
 }
-
 function modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
@@ -468,63 +572,43 @@ function modifyCellInBlob(blob, sheetName, fileRowIdx, colIdx, newVal){
   });
 }
 
-// ── AGGIUNGI RIGA (Dettagli Carico / ODP) ─────
+// ── AGGIUNGI RIGA ─────────────────────────────
 function addRow(sheetName, docNum){
   if(!adminMode) return;
   var fileId=currentFileIds[docNum];
   if(!fileId){ showToast('✗ FileId non trovato'); return; }
-
-  // Trova tutte le righe del DocNum in quella sheet e calcola LineNum progressivo
   var sheetRows=currentData[sheetName].rows;
   var groupRows=sheetRows.filter(function(r){ return norm(r[0])===docNum; });
   if(!groupRows.length){ showToast('✗ Gruppo DocNum non trovato'); return; }
-
-  // LineNum è col B = indice 1. Trova il massimo e incrementa
   var maxLine=0;
-  groupRows.forEach(function(r){
-    var ln=parseInt(String(r[1]||'0').trim(),10);
-    if(!isNaN(ln)&&ln>maxLine) maxLine=ln;
-  });
+  groupRows.forEach(function(r){ var ln=parseInt(String(r[1]||'0').trim(),10); if(!isNaN(ln)&&ln>maxLine) maxLine=ln; });
   var newLineNum=maxLine+1;
-
-  // Trova il __fileRowIdx dell'ultima riga del gruppo per inserire dopo
   var lastRow=groupRows[groupRows.length-1];
   var insertAfterFileRowIdx=lastRow.__fileRowIdx;
-
-  // Nuova riga: DocNum + LineNum, resto vuoto
   var nc=Math.max.apply(null,sheetRows.map(function(r){return r.length;}));
   var newRow=[];
   for(var i=0;i<nc;i++) newRow.push('');
-  newRow[0]=docNum;
-  newRow[1]=String(newLineNum);
-  newRow.__fileRowIdx=insertAfterFileRowIdx+1; // sarà la riga subito dopo
-
+  newRow[0]=docNum; newRow[1]=String(newLineNum);
+  newRow.__fileRowIdx=insertAfterFileRowIdx+1;
   setAwbSt('loading','⏳ Aggiunta riga...');
   downloadFile(fileId)
   .then(function(blob){ return addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow); })
   .then(function(result){
     return uploadFile(fileId, result.blob, '').then(function(){
-      // Aggiorna __fileRowIdx per le righe successive in tutte le sheet
-      // (hanno tutte __fileRowIdx > insertAfterFileRowIdx nello stesso file)
       SHEET_NAMES.forEach(function(sn){
         currentData[sn].rows.forEach(function(r){
-          if(currentFileIds[norm(r[0])]===fileId && r.__fileRowIdx>insertAfterFileRowIdx){
-            r.__fileRowIdx++;
-          }
+          if(currentFileIds[norm(r[0])]===fileId && r.__fileRowIdx>insertAfterFileRowIdx) r.__fileRowIdx++;
         });
       });
-      // Inserisci la nuova riga in memoria in fondo al gruppo
       var insertIdx=sheetRows.indexOf(lastRow)+1;
       sheetRows.splice(insertIdx,0,newRow);
-      // Aggiunge riga a video senza re-render — l'utente può modificarla subito
       addRowToDOM(sheetName, newRow, insertIdx, nc);
-      setAwbSt('ok','✓ Riga aggiunta (LineNum '+newLineNum+') — modifica le celle e premi Aggiorna');
+      setAwbSt('ok','✓ Riga aggiunta (LineNum '+newLineNum+')');
       setTimeout(function(){ setAwbSt('',''); },3000);
     });
   })
   .catch(function(e){ setAwbSt('err','✗ '+e.message); });
 }
-
 function addRowToDOM(sheetName, newRow, rowIdx, nc){
   var panelId=sheetName==='Dettagli Carico'?'tc':'to';
   var tbody=document.querySelector('#'+panelId+' tbody');
@@ -553,15 +637,12 @@ function addRowToDOM(sheetName, newRow, rowIdx, nc){
     }
     tr.appendChild(td);
   }
-  // Inserisci prima della riga tr-add del gruppo
-  var dn=norm(newRow[0]);
-  var inserted=false;
+  var dn=norm(newRow[0]); var inserted=false;
   tbody.querySelectorAll('tr.tr-add').forEach(function(ar){
     if(!inserted&&ar.textContent.indexOf(dn)!==-1){ tbody.insertBefore(tr,ar); inserted=true; }
   });
   if(!inserted) tbody.appendChild(tr);
 }
-
 function addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
@@ -572,25 +653,18 @@ function addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow){
         if(!rn) throw new Error('Sheet '+sheetName+' non trovato');
         var ws=wb.Sheets[rn];
         var range=XLSX.utils.decode_range(ws['!ref']||'A1');
-        var insertAt=insertAfterFileRowIdx+1; // indice dove inserire (0-based)
-
-        // Sposta tutte le righe da insertAt in giù di una posizione
+        var insertAt=insertAfterFileRowIdx+1;
         for(var r=range.e.r;r>=insertAt;r--){
           for(var c=0;c<=range.e.c;c++){
             var from=XLSX.utils.encode_cell({r:r,c:c});
             var to=XLSX.utils.encode_cell({r:r+1,c:c});
-            if(ws[from]){ ws[to]=ws[from]; delete ws[from]; }
-            else delete ws[to];
+            if(ws[from]){ ws[to]=ws[from]; delete ws[from]; } else delete ws[to];
           }
         }
-        // Scrivi la nuova riga
         for(var c=0;c<newRow.length;c++){
-          if(newRow[c]===''||newRow[c]===undefined||newRow[c]==='__fileRowIdx') continue;
-          if(c==='__fileRowIdx') continue;
+          if(newRow[c]===''||newRow[c]===undefined||c==='__fileRowIdx') continue;
           var val=newRow[c];
-          if(val!==''&&val!==undefined){
-            ws[XLSX.utils.encode_cell({r:insertAt,c:c})]={t:'s',v:String(val)};
-          }
+          if(val!==''&&val!==undefined) ws[XLSX.utils.encode_cell({r:insertAt,c:c})]={t:'s',v:String(val)};
         }
         range.e.r++;
         ws['!ref']=XLSX.utils.encode_range(range);
@@ -602,7 +676,7 @@ function addRowInBlob(blob, sheetName, insertAfterFileRowIdx, newRow){
   });
 }
 
-// ── CONFERMA ELIMINA ──────────────────────────
+// ── CONFERMA MODAL ────────────────────────────
 var confirmCallback=null;
 function showConfirm(title,msg,cb){
   document.getElementById('confirmTitle').textContent=title;
@@ -615,93 +689,68 @@ function closeConfirm(){
   confirmCallback=null;
 }
 document.getElementById('confirmOkBtn').addEventListener('click',function(){
-  var cb=confirmCallback; // salva prima di chiudere
-  closeConfirm();         // questo setta confirmCallback=null
-  if(cb) cb();            // esegui il callback salvato
+  var cb=confirmCallback; closeConfirm(); if(cb) cb();
 });
 document.addEventListener('click',function(e){
   if(e.target.id==='confirmModal') closeConfirm();
+  if(e.target.id==='odpModal') closeOdpModal();
 });
 
-// ── ELIMINA RIGA (Dettagli Carico / ODP) ──────
+// ── ELIMINA RIGA ──────────────────────────────
 function deleteRow(sheetName, rowIdx){
   var row=currentData[sheetName].rows[rowIdx];
   if(!row){ showToast('✗ Riga non trovata'); return; }
-  var docNum=norm(row[0]);
-  var fileRowIdx=row.__fileRowIdx;
-  var fileId=currentFileIds[docNum];
+  var docNum=norm(row[0]); var fileRowIdx=row.__fileRowIdx; var fileId=currentFileIds[docNum];
   if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
   if(fileRowIdx===undefined||fileRowIdx===null){ showToast('✗ Indice riga mancante'); return; }
-  // Cattura riferimento diretto alla riga — non usare rowIdx nel callback
   var rowRef=row;
-  showConfirm(
-    'Elimina riga',
-    'Stai per eliminare la riga <strong>'+esc(String(row[0]||''))+'</strong> da <strong>'+sheetName+'</strong>.<br>Questa operazione è irreversibile.',
-    function(){
-      setAwbSt('loading','⏳ Eliminazione riga...');
-      downloadFile(fileId)
-      .then(function(blob){ return deleteRowInBlob(blob, sheetName, fileRowIdx); })
-      .then(function(nb){ return uploadFile(fileId, nb, ''); })
-      .then(function(){
-        // Aggiorna __fileRowIdx per le righe successive nello stesso file
-        SHEET_NAMES.forEach(function(sn){
-          currentData[sn].rows.forEach(function(r){
-            if(currentFileIds[norm(r[0])]===fileId && r.__fileRowIdx>fileRowIdx) r.__fileRowIdx--;
-          });
-        });
-        // Rimuovi per riferimento diretto
-        var idx=currentData[sheetName].rows.indexOf(rowRef);
-        if(idx!==-1) currentData[sheetName].rows.splice(idx,1);
-        renderAll(currentData);
-        setAwbSt('ok','✓ Riga eliminata');
-        setTimeout(function(){ setAwbSt('',''); },2000);
-      })
-      .catch(function(e){ setAwbSt('err','✗ '+e.message); });
-    }
-  );
+  showConfirm('Elimina riga','Stai per eliminare la riga <strong>'+esc(String(row[0]||''))+'</strong> da <strong>'+sheetName+'</strong>.<br>Questa operazione è irreversibile.',function(){
+    setAwbSt('loading','⏳ Eliminazione riga...');
+    downloadFile(fileId)
+    .then(function(blob){ return deleteRowInBlob(blob, sheetName, fileRowIdx); })
+    .then(function(nb){ return uploadFile(fileId, nb, ''); })
+    .then(function(){
+      SHEET_NAMES.forEach(function(sn){
+        currentData[sn].rows.forEach(function(r){ if(currentFileIds[norm(r[0])]===fileId&&r.__fileRowIdx>fileRowIdx) r.__fileRowIdx--; });
+      });
+      var idx=currentData[sheetName].rows.indexOf(rowRef);
+      if(idx!==-1) currentData[sheetName].rows.splice(idx,1);
+      renderAll(currentData);
+      setAwbSt('ok','✓ Riga eliminata'); setTimeout(function(){ setAwbSt('',''); },2000);
+    })
+    .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+  });
 }
 
-// ── ELIMINA DOCNUM (Intestazione + tutte le sheet) ──
+// ── ELIMINA DOCNUM ────────────────────────────
 function deleteDocNum(rowIdx){
   var row=currentData['Intestazione'].rows[rowIdx];
   if(!row){ showToast('✗ Riga non trovata'); return; }
-  var docNum=norm(row[0]);
-  var fileId=currentFileIds[docNum];
+  var docNum=norm(row[0]); var fileId=currentFileIds[docNum];
   if(!fileId){ showToast('✗ FileId non trovato per '+docNum); return; }
-  showConfirm(
-    'Elimina spedizione',
-    'Stai per eliminare <strong>'+esc(String(row[0]||''))+'</strong> da <strong>tutte e 3 le sheet</strong> del file.<br>Questa operazione è irreversibile.',
-    function(){
-      setAwbSt('loading','⏳ Eliminazione spedizione...');
-      downloadFile(fileId)
-      .then(function(blob){ return deleteDocNumInBlob(blob, docNum); })
-      .then(function(result){
-        if(result.isEmpty){
-          // File vuoto → rinomina con prefisso _ELIMINATO_ (no permessi per cestino)
-          return renameFileAsDeleted(fileId).then(function(){
-            Object.keys(currentFileIds).forEach(function(k){ if(currentFileIds[k]===fileId) delete currentFileIds[k]; });
-            SHEET_NAMES.forEach(function(sn){
-              currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
-            });
-            renderAll(currentData);
-            setAwbSt('ok','✓ Spedizione eliminata — file rinominato come _ELIMINATO_');
-            setTimeout(function(){ setAwbSt('',''); },3000);
-          });
-        } else {
-          // File ha ancora dati → salva
-          return uploadFile(fileId, result.blob, '').then(function(){
-            SHEET_NAMES.forEach(function(sn){
-              currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; });
-            });
-            renderAll(currentData);
-            setAwbSt('ok','✓ Spedizione eliminata');
-            setTimeout(function(){ setAwbSt('',''); },2000);
-          });
-        }
-      })
-      .catch(function(e){ setAwbSt('err','✗ '+e.message); });
-    }
-  );
+  showConfirm('Elimina spedizione','Stai per eliminare <strong>'+esc(String(row[0]||''))+'</strong> da <strong>tutte e 3 le sheet</strong> del file.<br>Questa operazione è irreversibile.',function(){
+    setAwbSt('loading','⏳ Eliminazione spedizione...');
+    downloadFile(fileId)
+    .then(function(blob){ return deleteDocNumInBlob(blob, docNum); })
+    .then(function(result){
+      if(result.isEmpty){
+        return renameFileAsDeleted(fileId).then(function(){
+          Object.keys(currentFileIds).forEach(function(k){ if(currentFileIds[k]===fileId) delete currentFileIds[k]; });
+          SHEET_NAMES.forEach(function(sn){ currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; }); });
+          renderAll(currentData);
+          setAwbSt('ok','✓ Spedizione eliminata — file rinominato come _ELIMINATO_');
+          setTimeout(function(){ setAwbSt('',''); },3000);
+        });
+      } else {
+        return uploadFile(fileId, result.blob, '').then(function(){
+          SHEET_NAMES.forEach(function(sn){ currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; }); });
+          renderAll(currentData);
+          setAwbSt('ok','✓ Spedizione eliminata'); setTimeout(function(){ setAwbSt('',''); },2000);
+        });
+      }
+    })
+    .catch(function(e){ setAwbSt('err','✗ '+e.message); });
+  });
 }
 
 function deleteRowInBlob(blob, sheetName, fileRowIdx){
@@ -712,27 +761,21 @@ function deleteRowInBlob(blob, sheetName, fileRowIdx){
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
         var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sheetName.trim().toLowerCase();});
         if(!rn) throw new Error('Sheet '+sheetName+' non trovato');
-        var ws=wb.Sheets[rn];
-        var range=XLSX.utils.decode_range(ws['!ref']||'A1');
-        // Sposta tutte le righe dopo fileRowIdx di una posizione su
+        var ws=wb.Sheets[rn]; var range=XLSX.utils.decode_range(ws['!ref']||'A1');
         for(var r=fileRowIdx;r<range.e.r;r++){
           for(var c=0;c<=range.e.c;c++){
-            var from=XLSX.utils.encode_cell({r:r+1,c:c});
-            var to=XLSX.utils.encode_cell({r:r,c:c});
+            var from=XLSX.utils.encode_cell({r:r+1,c:c}); var to=XLSX.utils.encode_cell({r:r,c:c});
             if(ws[from]) ws[to]=ws[from]; else delete ws[to];
           }
         }
-        // Elimina ultima riga
         for(var c=0;c<=range.e.c;c++) delete ws[XLSX.utils.encode_cell({r:range.e.r,c:c})];
-        range.e.r--;
-        ws['!ref']=XLSX.utils.encode_range(range);
+        range.e.r--; ws['!ref']=XLSX.utils.encode_range(range);
         resolve(new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       }catch(err){reject(err);}
     };
     reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
-
 function deleteDocNumInBlob(blob, docNum){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
@@ -743,8 +786,7 @@ function deleteDocNumInBlob(blob, docNum){
         SHEET_NAMES.forEach(function(sn){
           var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()===sn.trim().toLowerCase();});
           if(!rn) return;
-          var ws=wb.Sheets[rn];
-          var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+          var ws=wb.Sheets[rn]; var range=XLSX.utils.decode_range(ws['!ref']||'A1');
           var toDelete=[];
           for(var r=2;r<=range.e.r;r++){
             var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
@@ -753,8 +795,7 @@ function deleteDocNumInBlob(blob, docNum){
           toDelete.reverse().forEach(function(ri){
             for(var rr=ri;rr<range.e.r;rr++){
               for(var c=0;c<=range.e.c;c++){
-                var from=XLSX.utils.encode_cell({r:rr+1,c:c});
-                var to=XLSX.utils.encode_cell({r:rr,c:c});
+                var from=XLSX.utils.encode_cell({r:rr+1,c:c}); var to=XLSX.utils.encode_cell({r:rr,c:c});
                 if(ws[from]) ws[to]=ws[from]; else delete ws[to];
               }
             }
@@ -762,20 +803,16 @@ function deleteDocNumInBlob(blob, docNum){
             range.e.r--;
           });
           ws['!ref']=XLSX.utils.encode_range(range);
-          // Conta righe dati rimaste (oltre le 2 di intestazione)
-          if(sn==='Intestazione') totalRowsLeft=Math.max(0, range.e.r-1);
+          if(sn==='Intestazione') totalRowsLeft=Math.max(0,range.e.r-1);
         });
         var blob2=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-        resolve({blob:blob2, isEmpty:totalRowsLeft===0});
+        resolve({blob:blob2,isEmpty:totalRowsLeft===0});
       }catch(err){reject(err);}
     };
     reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
-
-// Rinomina file aggiungendo prefisso _ELIMINATO_ (quando file diventa vuoto)
 function renameFileAsDeleted(fileId){
-  // Prima ottieni il nome attuale
   return gFetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?fields=name')
   .then(function(f){
     var newName='_ELIMINATO_'+(f.name||fileId);
@@ -816,13 +853,9 @@ function showToast(val){
 }
 
 // ── DATE ──────────────────────────────────────
-// Estrae data YYYYMMDD dalla fine del nome file (prima di .xlsx)
 function extractDate(name){
   var m=name.match(/(\d{8})\.xlsx$/i); return m?m[1]:null;
 }
-
-// Date disponibili (YYYYMMDD) caricate da Drive
-var availableDates=[];
 
 function loadDates(){
   var dl=document.getElementById('listDates');
@@ -838,7 +871,6 @@ function loadDates(){
       var o1=document.createElement('option'); o1.value=txt; dl.appendChild(o1);
       var o2=document.createElement('option'); o2.value=txt; dlTo.appendChild(o2);
     });
-    // Seleziona la prima data automaticamente
     if(availableDates.length){
       var first=availableDates[0];
       document.getElementById('fDate').value=first.substr(6,2)+'/'+first.substr(4,2)+'/'+first.substr(0,4);
@@ -848,23 +880,19 @@ function loadDates(){
   }).catch(function(){});
 }
 
-// Converte GG/MM/AAAA → YYYYMMDD, oppure se già YYYYMMDD lo lascia
 function parseInputDate(str){
   str=(str||'').trim();
-  // formato GG/MM/AAAA
   var m=str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if(m) return m[3]+m[2]+m[1];
-  // formato YYYYMMDD diretto
   if(/^\d{8}$/.test(str)) return str;
   return null;
 }
-
 function onDateChange(){
   var d=parseInputDate(document.getElementById('fDate').value);
   document.getElementById('btnLoad').disabled=!d;
 }
 
-// ── CARICA DATI (merge di tutti i file della data o range) ────────────
+// ── CARICA DATI ───────────────────────────────
 function loadData(){
   var dateFrom=parseInputDate(document.getElementById('fDate').value); if(!dateFrom)return;
   var dateTo=parseInputDate(document.getElementById('fDateTo').value)||dateFrom;
@@ -876,112 +904,80 @@ function loadData(){
   var fAwb     =document.getElementById('fAwb').value.trim();
   var fOdp     =document.getElementById('fOdp').value.trim();
   currentDate=dateFrom; AWB_MAP={}; currentData=null; currentFileIds={};
+  COL_COLLI=-1; COL_PESO=-1;
   var rangeLabel=dateFrom===dateTo
     ? dateFrom.substr(6,2)+'/'+dateFrom.substr(4,2)+'/'+dateFrom.substr(0,4)
     : dateFrom.substr(6,2)+'/'+dateFrom.substr(4,2)+'/'+dateFrom.substr(0,4)+' → '+dateTo.substr(6,2)+'/'+dateTo.substr(4,2)+'/'+dateTo.substr(0,4);
   setContent(spinnerHtml('Ricerca file per '+rangeLabel+'...',10));
   document.getElementById('statsBar').style.display='none';
+  document.getElementById('btnOdpCopy').disabled=true;
   setAwbSt('','');
 
   listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
-    // Filtra i file nel range di date
-    files=files.filter(function(f){
-      var d=extractDate(f.name);
-      return d && d>=dateFrom && d<=dateTo;
-    });
+    files=files.filter(function(f){ var d=extractDate(f.name); return d && d>=dateFrom && d<=dateTo; });
     if(!files.length) throw new Error('Nessun file trovato per il periodo '+rangeLabel);
     setContent(spinnerHtml('Download '+files.length+' file...',20));
-    return Promise.all(files.map(function(f){
-      return downloadFile(f.id).then(function(blob){
-        return {blob:blob, id:f.id, name:f.name};
-      });
-    }));
+    return Promise.all(files.map(function(f){ return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; }); }));
   })
   .then(function(results){
     setContent(spinnerHtml('Merge '+results.length+' file...',60));
     return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id,name:r.name}; }); }));
   })
   .then(function(parsed){
-    // Merge: unisci tutte le righe di ogni sheet, tieni le intestazioni dal primo file
     var merged={};
     SHEET_NAMES.forEach(function(sn){ merged[sn]={headers:[],rows:[]}; });
     var headersSet=false;
-
     parsed.forEach(function(p){
       SHEET_NAMES.forEach(function(sn){
         var sd=p.sheets[sn]||{headers:[],rows:[]};
         if(!headersSet&&sd.headers.length){ merged[sn].headers=sd.headers; }
-        // Mappa DocNum → fileId per sapere su quale file scrivere l'AWB
-        if(sn==='Intestazione'){
-          sd.rows.forEach(function(r){ currentFileIds[norm(r[0])]=p.id; });
-        }
+        if(sn==='Intestazione') sd.rows.forEach(function(r){ currentFileIds[norm(r[0])]=p.id; });
         merged[sn].rows=merged[sn].rows.concat(sd.rows);
       });
       headersSet=true;
     });
-
-    // Ordina per DocNum (col A) — ordine stabile indipendente dall'ordine dei file Drive
     SHEET_NAMES.forEach(function(sn){
       merged[sn].rows.sort(function(a,b){
         return String(a[0]||'').localeCompare(String(b[0]||''),undefined,{numeric:true});
       });
     });
 
-    // Popola dropdown filtri con tutti i valori unici del merge
     populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
-
-    // Applica filtri
     var md=applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fAwb,fOdp);
-    if(md){
-      SHEET_NAMES.forEach(function(sn){
-        merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; });
-      });
-    }
-
+    if(md){ SHEET_NAMES.forEach(function(sn){ merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; }); }); }
     currentData=merged;
-    document.getElementById('sFiles').textContent=parsed.length;
     renderAll(merged);
     document.getElementById('btnRefresh').disabled=false;
     document.getElementById('btnDownload').disabled=false;
+    document.getElementById('btnOdpCopy').disabled=false;
   })
   .catch(function(e){ setContent('<div class="state"><div class="state-ico">⚠️</div><div class="state-title">Errore</div><div>'+esc(e.message)+'</div></div>'); });
 }
 
-// Calcola il set di DocNum da tenere in base ai filtri
 function applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fAwb,fOdp){
   var intRows=(merged['Intestazione']||{rows:[]}).rows;
   var odpRows=(merged['Dettagli ODP']||{rows:[]}).rows;
   var md=null;
-  if(fPlant){
-    md=md||{};
-    intRows.forEach(function(r){ if(String(r[5]||'').trim()===fPlant) md[norm(r[0])]=true; });
-  }
+  if(fPlant){ md=md||{}; intRows.forEach(function(r){ if(String(r[5]||'').trim()===fPlant) md[norm(r[0])]=true; }); }
   if(fCommessa||fTipo||fDestino){
     var mdC={};
     intRows.forEach(function(r){
       var c=String(r[7]||'').trim(),t=String(r[6]||'').trim(),d=String(r[8]||'').trim();
       if((!fCommessa||c===fCommessa)&&(!fTipo||t===fTipo)&&(!fDestino||d===fDestino)) mdC[norm(r[0])]=true;
     });
-    if(md){ Object.keys(md).forEach(function(k){if(!mdC[k])delete md[k];}); }
-    else md=mdC;
+    if(md){ Object.keys(md).forEach(function(k){if(!mdC[k])delete md[k];}); } else md=mdC;
   }
   if(fAwb){
     var mdAwb={};
-    if(fAwb==='__VUOTI__'){
-      // Solo righe con AWB vuoto
-      intRows.forEach(function(r){ if(String(r[3]||'').trim()==='') mdAwb[norm(r[0])]=true; });
-    } else {
-      intRows.forEach(function(r){ if(String(r[3]||'').trim()===fAwb) mdAwb[norm(r[0])]=true; });
-    }
-    if(md){ Object.keys(md).forEach(function(k){if(!mdAwb[k])delete md[k];}); }
-    else md=mdAwb;
+    if(fAwb==='__VUOTI__'){ intRows.forEach(function(r){ if(String(r[3]||'').trim()==='') mdAwb[norm(r[0])]=true; }); }
+    else { intRows.forEach(function(r){ if(String(r[3]||'').trim()===fAwb) mdAwb[norm(r[0])]=true; }); }
+    if(md){ Object.keys(md).forEach(function(k){if(!mdAwb[k])delete md[k];}); } else md=mdAwb;
   }
   if(fOdp){
     var mdOdp={};
     odpRows.forEach(function(r){ if(String(r[2]||'').trim()===fOdp) mdOdp[norm(r[0])]=true; });
-    if(md){ Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];}); }
-    else md=mdOdp;
+    if(md){ Object.keys(md).forEach(function(k){if(!mdOdp[k])delete md[k];}); } else md=mdOdp;
   }
   return md;
 }
@@ -1002,18 +998,12 @@ function refreshData(){
   .then(function(files){
     files=files.filter(function(f){ return extractDate(f.name)===currentDate; });
     if(!files.length) throw new Error('Nessun file trovato');
-    return Promise.all(files.map(function(f){
-      return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; });
-    }));
+    return Promise.all(files.map(function(f){ return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; }); }));
   })
-  .then(function(results){
-    return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id}; }); }));
-  })
+  .then(function(results){ return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id}; }); })); })
   .then(function(parsed){
-    var merged={};
-    SHEET_NAMES.forEach(function(sn){ merged[sn]={headers:[],rows:[]}; });
-    var headersSet=false;
-    currentFileIds={};
+    var merged={}; SHEET_NAMES.forEach(function(sn){ merged[sn]={headers:[],rows:[]}; });
+    var headersSet=false; currentFileIds={};
     parsed.forEach(function(p){
       SHEET_NAMES.forEach(function(sn){
         var sd=p.sheets[sn]||{headers:[],rows:[]};
@@ -1023,17 +1013,13 @@ function refreshData(){
       });
       headersSet=true;
     });
-    // Ordina per DocNum — ordine stabile
     SHEET_NAMES.forEach(function(sn){
-      merged[sn].rows.sort(function(a,b){
-        return String(a[0]||'').localeCompare(String(b[0]||''),undefined,{numeric:true});
-      });
+      merged[sn].rows.sort(function(a,b){ return String(a[0]||'').localeCompare(String(b[0]||''),undefined,{numeric:true}); });
     });
     populateFilters(merged['Intestazione'].rows, merged['Dettagli ODP'].rows);
     var md=applyFilters(merged,fPlant,fCommessa,fTipo,fDestino,fAwb,fOdp);
     if(md){ SHEET_NAMES.forEach(function(sn){ merged[sn].rows=merged[sn].rows.filter(function(r){ return md[norm(r[0])]; }); }); }
     currentData=merged;
-    document.getElementById('sFiles').textContent=parsed.length;
     renderAll(merged);
     btn.classList.remove('spin'); btn.disabled=false;
     showToast('✓ Dati aggiornati');
@@ -1045,48 +1031,25 @@ function refreshData(){
 function populateFilters(intRows,odpRows){
   var plants={},commesse={},tipi={},destini={},awbs={},odps={};
   intRows.forEach(function(r){
-    var p=String(r[5]||'').trim();
-    var c=String(r[7]||'').trim();
-    var t=String(r[6]||'').trim();
-    var d=String(r[8]||'').trim();
-    var a=String(r[3]||'').trim();
-    if(p)plants[p]=true; if(c)commesse[c]=true; if(t)tipi[t]=true;
-    if(d)destini[d]=true; if(a)awbs[a]=true;
+    var p=String(r[5]||'').trim(),c=String(r[7]||'').trim(),t=String(r[6]||'').trim(),d=String(r[8]||'').trim(),a=String(r[3]||'').trim();
+    if(p)plants[p]=true; if(c)commesse[c]=true; if(t)tipi[t]=true; if(d)destini[d]=true; if(a)awbs[a]=true;
   });
   odpRows.forEach(function(r){ var o=String(r[2]||'').trim(); if(o)odps[o]=true; });
-  fillSelect('fPlant',plants,'— Tutti —');
-  fillSelect('fCommessa',commesse,'— Tutte —');
-  fillSelect('fTipo',tipi,'— Tutti —');
-  fillSelect('fDestino',destini,'— Tutti —');
-  fillSelectAwb('fAwb',awbs);
-  fillSelect('fOdp',odps,'— Tutti —');
+  fillSelect('fPlant',plants,'— Tutti —'); fillSelect('fCommessa',commesse,'— Tutte —');
+  fillSelect('fTipo',tipi,'— Tutti —'); fillSelect('fDestino',destini,'— Tutti —');
+  fillSelectAwb('fAwb',awbs); fillSelect('fOdp',odps,'— Tutti —');
 }
 function fillSelect(id,obj,placeholder){
   var sel=document.getElementById(id),prev=sel.value;
   sel.innerHTML='<option value="">'+placeholder+'</option>';
-  Object.keys(obj).sort().forEach(function(v){
-    var o=document.createElement('option'); o.value=v; o.text=v;
-    if(v===prev)o.selected=true; sel.appendChild(o);
-  });
-  // Ripristina selezione precedente se ancora valida
+  Object.keys(obj).sort().forEach(function(v){ var o=document.createElement('option'); o.value=v; o.text=v; if(v===prev)o.selected=true; sel.appendChild(o); });
   if(prev&&sel.value!==prev) sel.value='';
 }
-
 function fillSelectAwb(id,obj){
-  var sel=document.getElementById(id), prev=sel.value;
+  var sel=document.getElementById(id),prev=sel.value;
   sel.innerHTML='<option value="">— Tutti —</option><option value="__VUOTI__">— Vuoti —</option>';
-  Object.keys(obj).sort().forEach(function(v){
-    var o=document.createElement('option'); o.value=v; o.text=v;
-    sel.appendChild(o);
-  });
-  // Ripristina sempre la selezione precedente —
-  // '' e '__VUOTI__' sono sempre presenti, i valori dinamici solo se ancora nel file
+  Object.keys(obj).sort().forEach(function(v){ var o=document.createElement('option'); o.value=v; o.text=v; sel.appendChild(o); });
   sel.value=prev||'';
-}
-function fillDatalist(id,obj){
-  var dl=document.getElementById(id); if(!dl)return;
-  dl.innerHTML='';
-  Object.keys(obj).sort().forEach(function(v){ var o=document.createElement('option'); o.value=v; dl.appendChild(o); });
 }
 
 // ── DOWNLOAD EXCEL FILTRATO ───────────────────
@@ -1110,8 +1073,7 @@ function downloadFiltered(){
   if(fPlant)    parts.push(fPlant);
   if(fCommessa) parts.push(fCommessa);
   if(fDestino)  parts.push(fDestino.replace(/[\/\\:*?"<>|]/g,'_'));
-  var fname=parts.join('_')+'.xlsx';
-  XLSX.writeFile(wb,fname);
+  XLSX.writeFile(wb,parts.join('_')+'.xlsx');
 }
 
 // ── PARSE XLSX ────────────────────────────────
@@ -1131,7 +1093,7 @@ function parseXlsx(blob){
             var row=raw[i];
             if(!row.some(function(c){return c!=='';})) continue;
             var mapped=row.map(function(c){return c instanceof Date?fmtDate(c):c;});
-            mapped.__fileRowIdx=i; // salva indice riga originale nel file xlsx (0-based)
+            mapped.__fileRowIdx=i;
             rows.push(mapped);
           }
           out[sn]={headers:raw.slice(0,2),rows:rows};
@@ -1143,26 +1105,52 @@ function parseXlsx(blob){
   });
 }
 
+// ── CALCOLA TOTALI COLLI E PESO ───────────────
+// Colli = Intestazione r[10] (col K), Peso = Intestazione r[12] (col M)
+var COL_INT_COLLI=10, COL_INT_PESO=12;
+
+function calcTotals(intRows){
+  var totColli=0, totPeso=0;
+  intRows.forEach(function(r){
+    var vc=parseFloat(String(r[COL_INT_COLLI]||'').replace(',','.'));
+    if(!isNaN(vc)) totColli+=vc;
+    var vp=parseFloat(String(r[COL_INT_PESO]||'').replace(',','.'));
+    if(!isNaN(vp)) totPeso+=vp;
+  });
+  return {colli:totColli, peso:totPeso};
+}
+
+function fmtNum(n){
+  if(n===0) return '0';
+  if(Number.isInteger(n)) return n.toLocaleString('it-IT');
+  return n.toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:2});
+}
+
 // ── RENDER ────────────────────────────────────
 function renderAll(sheets){
   var int=sheets['Intestazione']||{headers:[],rows:[]};
   var car=sheets['Dettagli Carico']||{headers:[],rows:[]};
   var odp=sheets['Dettagli ODP']||{headers:[],rows:[]};
-  // Conta righe con AWB: prima guarda AWB_MAP (appena applicato), poi col D (indice 3) dal file
-  var awbCnt=int.rows.filter(function(r){
-    var dn=norm(r[0]);
-    return AWB_MAP[dn]||(String(r[3]||'').trim()!=='');
-  }).length;
+  var awbCnt=int.rows.filter(function(r){ var dn=norm(r[0]); return AWB_MAP[dn]||(String(r[3]||'').trim()!==''); }).length;
+
+  // Calcola totali da Intestazione (col K=colli, col M=peso)
+  var totals=calcTotals(int.rows);
+
   document.getElementById('sDoc').textContent=int.rows.length;
   document.getElementById('sCar').textContent=car.rows.length;
   document.getElementById('sOdp').textContent=odp.rows.length;
   document.getElementById('sAwb').textContent=awbCnt+' / '+int.rows.length;
+  document.getElementById('sColli').textContent=fmtNum(totals.colli);
+  document.getElementById('sPeso').textContent=fmtNum(totals.peso);
   document.getElementById('statsBar').style.display='flex';
+  document.getElementById('btnOdpCopy').disabled=false;
+
   var dateTo=document.getElementById('fDateTo').value||currentDate;
   var rangeLabel=currentDate===dateTo
     ? currentDate.substr(6,2)+'/'+currentDate.substr(4,2)+'/'+currentDate.substr(0,4)
     : currentDate.substr(6,2)+'/'+currentDate.substr(4,2)+'/'+currentDate.substr(0,4)+' → '+dateTo.substr(6,2)+'/'+dateTo.substr(4,2)+'/'+dateTo.substr(0,4);
   document.getElementById('fInfo').textContent=rangeLabel+' · '+int.rows.length+' spedizioni';
+
   var h='<div class="tabs">';
   h+=tabBtn('ti','Intestazione',int.rows.length,true);
   h+=tabBtn('tc','Dettagli Carico',car.rows.length,false);
@@ -1248,7 +1236,6 @@ function renderTable(sd,isInt,sheetName){
 }
 
 // ── AWB ───────────────────────────────────────
-// Il salvataggio scrive sull'file originale corretto per ogni DocNum
 function applyAwb(){
   var awb=document.getElementById('awbInput').value.trim();
   if(!awb){setAwbSt('err','⚠ Inserisci un codice AWB');return;}
@@ -1257,22 +1244,13 @@ function applyAwb(){
   if(!docs.length){setAwbSt('err','⚠ Nessuna riga filtrata');return;}
   document.getElementById('btnAwb').disabled=true;
   setAwbSt('loading','⏳ Salvataggio AWB su '+Object.keys(groupByFile(docs)).length+' file...');
-
-  // Raggruppa i DocNum per file di origine
   var groups=groupByFile(docs);
   var fileIds=Object.keys(groups);
-
-  // Aggiorna ogni file in parallelo
   Promise.all(fileIds.map(function(fid){
-    return downloadFile(fid).then(function(blob){
-      return modifyAwb(blob,groups[fid],awb).then(function(nb){
-        return uploadFile(fid,nb,'');
-      });
-    });
+    return downloadFile(fid).then(function(blob){ return modifyAwb(blob,groups[fid],awb).then(function(nb){ return uploadFile(fid,nb,''); }); });
   }))
   .then(function(){
     docs.forEach(function(dn){AWB_MAP[dn]=awb;});
-    // Aggiorna visivamente SOLO le righe della tab Intestazione (panel #ti)
     document.querySelectorAll('#ti tbody tr').forEach(function(tr){
       var dc=tr.querySelector('td.dn'); if(!dc)return;
       var dn=norm(dc.textContent);
@@ -1286,19 +1264,11 @@ function applyAwb(){
   })
   .catch(function(e){setAwbSt('err','✗ '+e.message);document.getElementById('btnAwb').disabled=false;});
 }
-
-// Raggruppa array di DocNum per fileId di origine
 function groupByFile(docNums){
   var groups={};
-  docNums.forEach(function(dn){
-    var fid=currentFileIds[dn];
-    if(!fid)return;
-    if(!groups[fid])groups[fid]=[];
-    groups[fid].push(dn);
-  });
+  docNums.forEach(function(dn){ var fid=currentFileIds[dn]; if(!fid)return; if(!groups[fid])groups[fid]=[]; groups[fid].push(dn); });
   return groups;
 }
-
 function modifyAwb(blob,docNums,awbValue){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
@@ -1307,12 +1277,11 @@ function modifyAwb(blob,docNums,awbValue){
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
         var rn=wb.SheetNames.find(function(n){return n.trim().toLowerCase()==='intestazione';});
         if(!rn)throw new Error('Sheet Intestazione non trovato');
-        var ws=wb.Sheets[rn];
-        var range=XLSX.utils.decode_range(ws['!ref']||'A1');
-        var ds={};docNums.forEach(function(d){ds[d]=true;});
+        var ws=wb.Sheets[rn]; var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+        var ds={}; docNums.forEach(function(d){ds[d]=true;});
         for(var r=2;r<=range.e.r;r++){
           var ca=ws[XLSX.utils.encode_cell({r:r,c:0})];
-          if(ca&&ds[norm(ca.v)])ws[XLSX.utils.encode_cell({r:r,c:3})]={t:'s',v:awbValue};
+          if(ca&&ds[norm(ca.v)]) ws[XLSX.utils.encode_cell({r:r,c:3})]={t:'s',v:awbValue};
         }
         var out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
         resolve(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
@@ -1322,9 +1291,266 @@ function modifyAwb(blob,docNums,awbValue){
   });
 }
 
+// ── ODP SMART COPY ────────────────────────────
+var odpMode='compact';
+var ODP_MAX_CHARS=30;
+
+function getOdpColIdx(){
+  var sd=currentData['Dettagli ODP']||{headers:[],rows:[]};
+  var hdr=(sd.headers[1]||sd.headers[0]||[]);
+  for(var i=0;i<hdr.length;i++){
+    var h=String(hdr[i]||'').trim().toUpperCase();
+    if(h==='NUMERO_ODP'||h==='U_ODP'||h.indexOf('ODP')!==-1) return i;
+  }
+  return 2;
+}
+
+function getOdpList(){
+  if(!currentData) return [];
+  var odpRows=(currentData['Dettagli ODP']||{rows:[]}).rows;
+  var col=getOdpColIdx();
+  var seen={};
+  var list=[];
+  odpRows.forEach(function(r){
+    var raw=r[col];
+    var v=String(raw===null||raw===undefined?'':raw).trim();
+    if(v&&!seen[v]){ seen[v]=true; list.push(v); }
+  });
+  return list;
+}
+
+// ── PREFISSO COMUNE ───────────────────────────
+// Trova il prefisso comune più lungo tra due stringhe
+function commonPrefix(a, b){
+  var i=0;
+  while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  return a.substring(0,i);
+}
+
+// Trova il prefisso comune di un array di stringhe
+function groupPrefix(arr){
+  if(!arr.length) return '';
+  var p=arr[0];
+  for(var i=1;i<arr.length;i++) p=commonPrefix(p,arr[i]);
+  return p;
+}
+
+// ── RAGGRUPPA ODP PER PREFISSO ────────────────
+// Raggruppa ODP che condividono almeno MIN_PREFIX caratteri in comune
+// Gruppi con prefisso troppo corto vengono tenuti separati → leggibilità
+var ODP_MIN_PREFIX=3;
+function groupByPrefix(list){
+  if(!list.length) return [];
+  var groups=[];
+  var cur=[list[0]];
+  for(var i=1;i<list.length;i++){
+    var candidate=cur.concat([list[i]]);
+    var p=groupPrefix(candidate);
+    if(p.length>=ODP_MIN_PREFIX){
+      cur=candidate;
+    } else {
+      groups.push(cur);
+      cur=[list[i]];
+    }
+  }
+  groups.push(cur);
+  return groups;
+}
+
+// ── COMPRIMI UN GRUPPO IN STRINGA ─────────────
+// Dato un gruppo con prefisso comune, produce "base(+s1+s2+...)"
+// oppure se c'è un solo elemento, solo "base"
+function compressGroup(group){
+  if(group.length===1) return group[0];
+  var prefix=groupPrefix(group);
+  // suffissi = parte dopo il prefisso
+  var suffixes=group.map(function(v){ return v.substring(prefix.length); });
+  // Il primo elemento: se il prefisso è già l'intera stringa, suffisso = ''
+  // Formato: prefix(+s1+s2+...) oppure prefix se tutti i suffissi sono vuoti
+  var nonEmpty=suffixes.filter(function(s){return s!=='';});
+  if(!nonEmpty.length) return prefix; // tutti identici
+  // Se il primo ODP è uguale al prefisso (nessun suffisso), non aggiungerlo
+  var parts=suffixes.filter(function(s){ return s!==''; });
+  return prefix+'(+'+parts.join('+') + ')';
+}
+
+// ── SPEZZA IN SCAGLIONI ≤ MAX CHARS ──────────
+// tokens = array di stringhe già compresse per gruppo
+// Se un token supera da solo il limite → lo spezza ulteriormente
+// togliendo un suffisso alla volta finché non sta
+function splitIntoChunks(tokens, maxChars){
+  var chunks=[];
+  var cur='';
+  var SEP=' + ';
+
+  tokens.forEach(function(tok){
+    if(!tok) return;
+    var candidate=cur ? cur+SEP+tok : tok;
+    if(candidate.length<=maxChars){
+      cur=candidate;
+    } else {
+      if(cur) chunks.push(cur);
+      // Il token singolo è già troppo lungo?
+      // Prova a spezzare il gruppo interno in sub-blocchi
+      if(tok.length>maxChars){
+        var subChunks=breakLargeToken(tok, maxChars);
+        subChunks.forEach(function(sc,si){
+          if(si<subChunks.length-1) chunks.push(sc);
+          else cur=sc;
+        });
+      } else {
+        cur=tok;
+      }
+    }
+  });
+  if(cur) chunks.push(cur);
+  return chunks;
+}
+
+// Spezza un token "base(+s1+s2+...)" in più blocchi ≤ maxChars
+function breakLargeToken(tok, maxChars){
+  // Prova a parsare come base(+s1+s2+...)
+  var m=tok.match(/^(.*?)\(\+(.+)\)$/);
+  if(!m) return [tok]; // non parsabile, lascia così
+
+  var base=m[1];
+  var parts=m[2].split('+');
+  var chunks=[];
+  var cur=base+'(+'+parts[0];
+  for(var i=1;i<parts.length;i++){
+    var candidate=cur+'+'+parts[i];
+    if((candidate+')').length<=maxChars){
+      cur=candidate;
+    } else {
+      chunks.push(cur+')');
+      cur=base+'(+'+parts[i];
+    }
+  }
+  chunks.push(cur+')');
+  return chunks;
+}
+
+// ── ENTRY POINT COMPRESSIONE ──────────────────
+function buildChunks(list, mode){
+  if(mode==='full'){
+    // Nessuna compressione: ogni ODP è un token, poi spezza a 30 char
+    return splitIntoChunks(list, ODP_MAX_CHARS);
+  }
+  // Mode compact: raggruppa per prefisso, comprimi, poi spezza
+  var groups=groupByPrefix(list);
+  var tokens=groups.map(function(g){ return compressGroup(g); });
+  return splitIntoChunks(tokens, ODP_MAX_CHARS);
+}
+
+// ── RENDER CHUNKS ─────────────────────────────
+function renderChunks(){
+  var list=getOdpList();
+  var container=document.getElementById('odpChunks');
+  container.innerHTML='';
+
+  if(!list.length){
+    var odpRows=(currentData['Dettagli ODP']||{rows:[]}).rows;
+    if(odpRows.length>0){
+      var lines=[];
+      odpRows.slice(0,4).forEach(function(r,i){
+        var vals=[];
+        for(var c=0;c<Math.min(r.length,8);c++){
+          vals.push('['+c+']="'+String(r[c]===null||r[c]===undefined?'':r[c]).substring(0,12)+'"');
+        }
+        lines.push('R'+i+': '+vals.join('  '));
+      });
+      container.innerHTML='<div style="font-family:var(--ff-mono);font-size:11px;color:var(--red);white-space:pre;padding:10px">⚠ Nessun ODP in r['+getOdpColIdx()+'].\n\n'+lines.join('\n')+'\n\n→ Dimmi quale indice contiene NUMERO_ODP</div>';
+      document.getElementById('odpStats').textContent='0 ODP — '+odpRows.length+' righe';
+    } else {
+      container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:10px">Nessuna riga ODP nelle selezioni correnti.</div>';
+      document.getElementById('odpStats').textContent='0 ODP';
+    }
+    return;
+  }
+
+  var chunks=buildChunks(list, odpMode);
+
+  document.getElementById('odpStats').textContent=
+    list.length+' ODP unici → '+chunks.length+' scaglioni (max '+ODP_MAX_CHARS+' char)';
+
+  chunks.forEach(function(chunk, idx){
+    var row=document.createElement('div');
+    row.className='odp-chunk';
+
+    var num=document.createElement('span');
+    num.className='odp-chunk-num';
+    num.textContent=(idx+1)+'.';
+    row.appendChild(num);
+
+    var txt=document.createElement('span');
+    txt.className='odp-chunk-text';
+    txt.textContent=chunk;
+    row.appendChild(txt);
+
+    var len=document.createElement('span');
+    len.className='odp-chunk-len';
+    len.textContent=chunk.length+' ch';
+    if(chunk.length>ODP_MAX_CHARS) len.style.color='var(--red)';
+    row.appendChild(len);
+
+    var btn=document.createElement('button');
+    btn.className='odp-chunk-copy';
+    btn.textContent='Copia';
+    (function(c,b){
+      b.addEventListener('click',function(){
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(c).then(function(){
+            b.textContent='✓'; b.classList.add('copied');
+            setTimeout(function(){ b.textContent='Copia'; b.classList.remove('copied'); },1500);
+          }).catch(function(){ legacyCopy(c,b); });
+        } else { legacyCopy(c,b); }
+      });
+    })(chunk, btn);
+    row.appendChild(btn);
+    container.appendChild(row);
+  });
+}
+
+function legacyCopy(text, btn){
+  var ta=document.createElement('textarea');
+  ta.value=text; ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); btn.textContent='✓'; btn.classList.add('copied'); setTimeout(function(){btn.textContent='Copia';btn.classList.remove('copied');},1500); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+function setOdpMode(mode){
+  odpMode=mode;
+  document.querySelectorAll('.odp-opt-btn').forEach(function(b){ b.classList.remove('sel'); });
+  document.getElementById(mode==='compact'?'optCompact':'optFull').classList.add('sel');
+  renderChunks();
+}
+
+function copyAllChunks(){
+  var chunks=[];
+  document.querySelectorAll('.odp-chunk-text').forEach(function(el){ chunks.push(el.textContent); });
+  var all=chunks.join('\n');
+  if(!all) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(all).then(function(){ showToast('Tutti gli scaglioni copiati!'); closeOdpModal(); }).catch(function(){ fallbackCopy(all); closeOdpModal(); });
+  } else { fallbackCopy(all); closeOdpModal(); }
+}
+
+function openOdpModal(){
+  if(!currentData) return;
+  var odpRows=(currentData['Dettagli ODP']||{rows:[]}).rows;
+  document.getElementById('odpModalSub').textContent='ODP da '+odpRows.length+' righe filtrate';
+  document.getElementById('odpModal').classList.remove('hide');
+  renderChunks();
+}
+
+function closeOdpModal(){
+  document.getElementById('odpModal').classList.add('hide');
+}
+
 // ── DRIVE API ─────────────────────────────────
-function listFiles(q){return gFetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name)&pageSize=200').then(function(r){return r.files||[];});}
-function downloadFile(id){return fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){if(!r.ok)throw new Error('Download fallito: '+r.status);return r.blob();});}
+function listFiles(q){ return gFetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name)&pageSize=200').then(function(r){return r.files||[];}); }
+function downloadFile(id){ return fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){if(!r.ok)throw new Error('Download fallito: '+r.status);return r.blob();}); }
 function uploadFile(fileId,blob,name){
   var boundary='sped_'+Date.now(),meta=JSON.stringify(name?{name:name}:{}),enc=new TextEncoder();
   var pre='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+boundary+'\r\nContent-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\r\n\r\n';
@@ -1335,7 +1561,7 @@ function uploadFile(fileId,blob,name){
   }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error('Upload: '+t);});return r.json();});
 }
 function gFetch(url){
-  if(!TOKEN)return Promise.reject(new Error('No token'));
+  if(!TOKEN) return Promise.reject(new Error('No token'));
   return fetch(url,{headers:{Authorization:'Bearer '+TOKEN}}).then(function(r){return r.json();});
 }
 
