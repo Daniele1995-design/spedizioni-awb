@@ -1220,7 +1220,7 @@ function fillDatalist(datalistId, obj, addVuoti){
   var dl=document.getElementById(datalistId);
   dl.innerHTML='';
   if(addVuoti){
-    var ov=document.createElement('option'); ov.value='__VUOTI__'; ov.label='— Vuoti —'; dl.appendChild(ov);
+    var ov=document.createElement('option'); ov.value='__VUOTI__'; dl.appendChild(ov);
   }
   Object.keys(obj).sort().forEach(function(v){
     var o=document.createElement('option'); o.value=v; dl.appendChild(o);
