@@ -1528,11 +1528,11 @@ function applyAwb(){
     var esistenti=already.map(function(r){
       var dn=norm(r[0]);
       var dest=String(r[8]||'').trim()||'—';
-      var tipo=String(r[5]||'').trim()||'—';
-      var tipo=String(r[6]||'').trim()||'—';
-      var data=String(r[4]||'').trim();
-      if(/^\d{8}$/.test(data)) data=data.substr(6,2)+'/'+data.substr(4,2)+'/'+data.substr(0,4);
-      return '<strong>'+esc(dn)+'</strong> ('+esc(dest)+' · '+esc(data)+')';
+var tipo=String(r[6]||'').trim()||'—';
+var plant=String(r[5]||'').trim()||'—';
+var data=String(r[4]||'').trim();
+if(/^\d{8}$/.test(data)) data=data.substr(6,2)+'/'+data.substr(4,2)+'/'+data.substr(0,4);
+return '<strong>'+esc(dn)+'</strong> ('+esc(plant)+' · '+esc(dest)+' · '+esc(tipo)+' · '+esc(data)+')';
     }).join('<br>');
     showConfirm(
       '⚠ AWB già utilizzato',
