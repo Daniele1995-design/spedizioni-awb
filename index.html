@@ -862,7 +862,7 @@ function deleteDocNum(rowIdx){
           Object.keys(currentFileIds).forEach(function(k){ if(currentFileIds[k]===fileId) delete currentFileIds[k]; });
           SHEET_NAMES.forEach(function(sn){ currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; }); });
           renderAll(currentData);
-          setAwbSt('ok','✓ Spedizione eliminata — file rinominato come _ELIMINATO_');
+          setAwbSt('ok','✓ Spedizione eliminata — file spostato nel cestino');
           setTimeout(function(){ setAwbSt('',''); },3000);
         });
       } else {
@@ -936,15 +936,14 @@ function deleteDocNumInBlob(blob, docNum){
     reader.onerror=reject; reader.readAsArrayBuffer(blob);
   });
 }
-function renameFileAsDeleted(fileId){
-  return gFetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?fields=name')
-  .then(function(f){
-    var newName='_ELIMINATO_'+(f.name||fileId);
-    return fetch('https://www.googleapis.com/drive/v3/files/'+fileId,{
-      method:'PATCH',
-      headers:{Authorization:'Bearer '+TOKEN,'Content-Type':'application/json'},
-      body:JSON.stringify({name:newName})
-    }).then(function(r){ if(!r.ok) return r.text().then(function(t){throw new Error('Rename: '+t);}); return r.json(); });
+  function renameFileAsDeleted(fileId){
+  return fetch('https://www.googleapis.com/drive/v3/files/'+fileId,{
+    method:'PATCH',
+    headers:{Authorization:'Bearer '+TOKEN,'Content-Type':'application/json'},
+    body:JSON.stringify({trashed:true})
+  }).then(function(r){
+    if(!r.ok) return r.text().then(function(t){throw new Error('Cestino: '+t);});
+    return r.json();
   });
 }
 
