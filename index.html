@@ -477,6 +477,33 @@ var CLIENT_ID   = '256693770433-b1pjdpaglrh7827o6ln2s24802rcnshd.apps.googleuser
 var FOLDER_ID   = '1dSm4qSDB2cZ5WhwDf_40TF-K7sjwStg4';
 var SHEET_NAMES = ['Intestazione','Dettagli Carico','Dettagli ODP'];
 var TOKEN=null, currentData=null, currentDate=null, currentDateTo=null, AWB_MAP={};
+  var _folderCache={};
+var _datesCache=null;
+
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
+}
+
+function getFolderIdForDate(dateStr){
+  if(_folderCache[dateStr]) return Promise.resolve(_folderCache[dateStr]);
+  return listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.google-apps.folder" and name="'+dateStr+'" and trashed=false')
+  .then(function(folders){
+    if(!folders.length) throw new Error('Cartella '+dateStr+' non trovata');
+    _folderCache[dateStr]=folders[0].id;
+    return folders[0].id;
+  });
+}
+
+function buildDateRange(from, to){
+  var dates=[], d=from;
+  while(d<=to){
+    dates.push(d);
+    var tmp=new Date(d.substr(0,4), parseInt(d.substr(4,2))-1, parseInt(d.substr(6,2))+1);
+    d=tmp.getFullYear()+('0'+(tmp.getMonth()+1)).slice(-2)+('0'+tmp.getDate()).slice(-2);
+  }
+  return dates;
+}
 var currentFileIds={};
 var copyModeOn=false, toastTimer=null;
 // Timer per filtraggio con debounce su input liberi AWB/ODP
@@ -985,11 +1012,14 @@ function loadDates(){
   var dl=document.getElementById('listDates');
   var dlTo=document.getElementById('listDatesTo');
   dl.innerHTML=''; dlTo.innerHTML='';
-  listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
-  .then(function(files){
+
+  var doLoad=function(folders){
     var set={};
-    files.filter(function(f){ return f.name.indexOf('_ELIMINATO_')===-1; })
-     .forEach(function(f){ var d=extractDate(f.name); if(d) set[d]=true; });
+    folders.forEach(function(f){
+      if(/^\d{8}$/.test(f.name)) set[f.name]=true;
+    });
+    set[todayStr()]=true; // oggi è sempre disponibile
+
     availableDates=Object.keys(set).sort().reverse();
     availableDates.forEach(function(d){
       var txt=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
@@ -1002,6 +1032,14 @@ function loadDates(){
       document.getElementById('btnLoad').disabled=false;
       loadData();
     }
+  };
+
+  if(_datesCache){ doLoad(_datesCache); return; }
+
+  listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.google-apps.folder" and trashed=false')
+  .then(function(folders){
+    _datesCache=folders;
+    doLoad(folders);
   }).catch(function(){});
 }
 
@@ -1054,13 +1092,41 @@ function loadData(){
   document.getElementById('btnOdpCopy').disabled=true;
   setAwbSt('','');
 
-  listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
-  .then(function(files){
-    files=files.filter(function(f){ var d=extractDate(f.name); return d && d>=dateFrom && d<=dateTo && f.name.indexOf('_ELIMINATO_')===-1; });
+(function(){
+  var today=todayStr();
+  var datesInRange=buildDateRange(dateFrom,dateTo);
+  var todayInRange=datesInRange.indexOf(today)!==-1;
+  var pastDates=datesInRange.filter(function(d){ return d!==today; });
+
+  var pToday=todayInRange
+    ? listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+        .then(function(files){
+          return files.filter(function(f){
+            var d=extractDate(f.name);
+            return d && d>=dateFrom && d<=dateTo && f.name.indexOf('_ELIMINATO_')===-1;
+          });
+        })
+    : Promise.resolve([]);
+
+  var pPast=pastDates.length
+    ? Promise.all(pastDates.map(function(dt){
+        return getFolderIdForDate(dt)
+          .then(function(fid){
+            return listFiles('"'+fid+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false');
+          })
+          .catch(function(){ return []; });
+      })).then(function(arrays){
+        return [].concat.apply([],arrays).filter(function(f){ return f.name.indexOf('_ELIMINATO_')===-1; });
+      })
+    : Promise.resolve([]);
+
+  return Promise.all([pToday,pPast]).then(function(results){
+    var files=results[0].concat(results[1]);
     if(!files.length) throw new Error('Nessun file trovato per il periodo '+rangeLabel);
     setContent(spinnerHtml('Download '+files.length+' file...',20));
     return Promise.all(files.map(function(f){ return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; }); }));
-  })
+  });
+})()
   .then(function(results){
     setContent(spinnerHtml('Merge '+results.length+' file...',60));
     return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id,name:r.name}; }); }));
@@ -1156,10 +1222,16 @@ function refreshData(){
   var btn=document.getElementById('btnRefresh');
   btn.classList.add('spin'); btn.disabled=true;
 
-  listFiles('"'+FOLDER_ID+'" in parents and name contains "'+currentDate+'" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
-  .then(function(files){
-    files=files.filter(function(f){ return extractDate(f.name)===currentDate && f.name.indexOf('_ELIMINATO_')===-1; });
-    if(!files.length) throw new Error('Nessun file trovato');
+(currentDate===todayStr()
+  ? listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+      .then(function(files){ return files.filter(function(f){ return extractDate(f.name)===currentDate && f.name.indexOf('_ELIMINATO_')===-1; }); })
+  : getFolderIdForDate(currentDate)
+      .then(function(fid){ return listFiles('"'+fid+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false'); })
+      .then(function(files){ return files.filter(function(f){ return f.name.indexOf('_ELIMINATO_')===-1; }); })
+      .catch(function(){ return []; })
+)
+.then(function(files){
+  if(!files.length) throw new Error('Nessun file trovato');
     return Promise.all(files.map(function(f){ return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; }); }));
   })
   .then(function(results){ return Promise.all(results.map(function(r){ return parseXlsx(r.blob).then(function(s){ return {sheets:s,id:r.id}; }); })); })
