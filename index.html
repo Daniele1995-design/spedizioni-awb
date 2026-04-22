@@ -862,7 +862,7 @@ function deleteDocNum(rowIdx){
           Object.keys(currentFileIds).forEach(function(k){ if(currentFileIds[k]===fileId) delete currentFileIds[k]; });
           SHEET_NAMES.forEach(function(sn){ currentData[sn].rows=currentData[sn].rows.filter(function(r){ return norm(r[0])!==docNum; }); });
           renderAll(currentData);
-          setAwbSt('ok','✓ Spedizione eliminata — file spostato nel cestino');
+          setAwbSt('ok','✓ Spedizione eliminata — file rinominato come _ELIMINATO_');
           setTimeout(function(){ setAwbSt('',''); },3000);
         });
       } else {
@@ -937,13 +937,14 @@ function deleteDocNumInBlob(blob, docNum){
   });
 }
   function renameFileAsDeleted(fileId){
-  return fetch('https://www.googleapis.com/drive/v3/files/'+fileId,{
-    method:'PATCH',
-    headers:{Authorization:'Bearer '+TOKEN,'Content-Type':'application/json'},
-    body:JSON.stringify({trashed:true})
-  }).then(function(r){
-    if(!r.ok) return r.text().then(function(t){throw new Error('Cestino: '+t);});
-    return r.json();
+  return gFetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?fields=name')
+  .then(function(f){
+    var newName='_ELIMINATO_'+(f.name||fileId);
+    return fetch('https://www.googleapis.com/drive/v3/files/'+fileId,{
+      method:'PATCH',
+      headers:{Authorization:'Bearer '+TOKEN,'Content-Type':'application/json'},
+      body:JSON.stringify({name:newName})
+    }).then(function(r){ if(!r.ok) return r.text().then(function(t){throw new Error('Rename: '+t);}); return r.json(); });
   });
 }
 
@@ -987,7 +988,8 @@ function loadDates(){
   listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
     var set={};
-    files.forEach(function(f){ var d=extractDate(f.name); if(d) set[d]=true; });
+    files.filter(function(f){ return f.name.indexOf('_ELIMINATO_')===-1; })
+     .forEach(function(f){ var d=extractDate(f.name); if(d) set[d]=true; });
     availableDates=Object.keys(set).sort().reverse();
     availableDates.forEach(function(d){
       var txt=d.substr(6,2)+'/'+d.substr(4,2)+'/'+d.substr(0,4);
@@ -1054,7 +1056,7 @@ function loadData(){
 
   listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
-    files=files.filter(function(f){ var d=extractDate(f.name); return d && d>=dateFrom && d<=dateTo; });
+    files=files.filter(function(f){ var d=extractDate(f.name); return d && d>=dateFrom && d<=dateTo && f.name.indexOf('_ELIMINATO_')===-1; });
     if(!files.length) throw new Error('Nessun file trovato per il periodo '+rangeLabel);
     setContent(spinnerHtml('Download '+files.length+' file...',20));
     return Promise.all(files.map(function(f){ return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; }); }));
@@ -1156,7 +1158,7 @@ function refreshData(){
 
   listFiles('"'+FOLDER_ID+'" in parents and name contains "'+currentDate+'" and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
   .then(function(files){
-    files=files.filter(function(f){ return extractDate(f.name)===currentDate; });
+    files=files.filter(function(f){ return extractDate(f.name)===currentDate && f.name.indexOf('_ELIMINATO_')===-1; });
     if(!files.length) throw new Error('Nessun file trovato');
     return Promise.all(files.map(function(f){ return downloadFile(f.id).then(function(blob){ return {blob:blob,id:f.id,name:f.name}; }); }));
   })
