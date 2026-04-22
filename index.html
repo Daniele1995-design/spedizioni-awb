@@ -1236,8 +1236,13 @@ function refreshData(){
   btn.classList.add('spin'); btn.disabled=true;
 
 (currentDate===todayStr()
-  ? listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
-      .then(function(files){ return files.filter(function(f){ return extractDate(f.name)===currentDate && f.name.indexOf('_ELIMINATO_')===-1; }); })
+  ? getFolderIdForDate(todayStr())
+      .then(function(fid){ return listFiles('"'+fid+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false'); })
+      .then(function(files){ return files.filter(function(f){ return f.name.indexOf('_ELIMINATO_')===-1; }); })
+      .catch(function(){
+        return listFiles('"'+FOLDER_ID+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false')
+          .then(function(files){ return files.filter(function(f){ return extractDate(f.name)===currentDate && f.name.indexOf('_ELIMINATO_')===-1; }); });
+      })
   : getFolderIdForDate(currentDate)
       .then(function(fid){ return listFiles('"'+fid+'" in parents and mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" and trashed=false'); })
       .then(function(files){ return files.filter(function(f){ return f.name.indexOf('_ELIMINATO_')===-1; }); })
